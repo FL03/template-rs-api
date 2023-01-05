@@ -1,0 +1,5 @@
+tasks:
+  - init: cargo xtask setup --extras && cargo xtask auto
+    command: cargo watch -x build
+
+
