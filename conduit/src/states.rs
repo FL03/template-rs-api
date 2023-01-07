@@ -56,7 +56,7 @@ impl From<States> for i64 {
 
 impl From<State> for States {
     fn from(val: State) -> Self {
-        val.state.clone()
+        val.state
     }
 }
 
@@ -66,9 +66,9 @@ impl From<States> for State {
     }
 }
 
-impl Into<Locked<State>> for States {
-    fn into(self) -> Locked<State> {
-        Arc::new(Mutex::new(State::new(None, None, Some(self))))
+impl From<States> for Locked<State> {
+    fn from(val: States) -> Self {
+        Arc::new(Mutex::new(State::new(None, None, Some(val))))
     }
 }
 

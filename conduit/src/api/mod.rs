@@ -12,7 +12,7 @@ pub fn new() -> Api {
 }
 
 pub fn from_context(ctx: crate::Context) -> Api {
-    Api::new(ctx.clone())
+    Api::new(ctx)
 }
 
 pub async fn handle(ctx: crate::Context) -> tokio::task::JoinHandle<Api> {
@@ -25,7 +25,10 @@ pub async fn handle(ctx: crate::Context) -> tokio::task::JoinHandle<Api> {
 
 pub(crate) mod interface {
     use crate::{api::routes, Context};
-    use acme::prelude::{servers::{Server, ServerSpec}, WebBackend};
+    use acme::prelude::{
+        servers::{Server, ServerSpec},
+        WebBackend,
+    };
     use axum::Router;
     use http::header::{HeaderName, AUTHORIZATION};
     use scsys::AsyncResult;

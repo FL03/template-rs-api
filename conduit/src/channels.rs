@@ -11,7 +11,6 @@ pub type OneshotChannels<T> = (oneshot::Sender<T>, oneshot::Receiver<T>);
 
 pub type UnboundedMPSC<T> = (mpsc::UnboundedSender<T>, mpsc::UnboundedReceiver<T>);
 
-
 #[derive(Debug)]
 pub struct AppChannels {
     pub ctx: OneshotChannels<Context>,

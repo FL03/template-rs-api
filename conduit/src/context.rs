@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::{Settings, OneshotChannels, UnboundedMPSC};
+use crate::{OneshotChannels, Settings, UnboundedMPSC};
 use scsys::prelude::{Contextual, Hash, Hashable, SerdeDisplay};
 use serde::{Deserialize, Serialize};
 use std::{convert::From, path::PathBuf};
@@ -60,14 +60,14 @@ impl Contextual for Context {
     }
 }
 
-impl Into<OneshotChannels<Context>> for Context {
-    fn into(self) -> OneshotChannels<Context> {
+impl From<Context> for OneshotChannels<Context> {
+    fn from(_val: Context) -> Self {
         tokio::sync::oneshot::channel()
     }
 }
 
-impl Into<UnboundedMPSC<Context>> for Context {
-    fn into(self) -> UnboundedMPSC<Context> {
+impl From<Context> for UnboundedMPSC<Context> {
+    fn from(_val: Context) -> Self {
         tokio::sync::mpsc::unbounded_channel()
     }
 }

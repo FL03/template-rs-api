@@ -4,7 +4,9 @@
     Description: ... summary ...
 */
 use scsys::prelude::config::{Config, Environment};
-use scsys::prelude::{try_collect_config_files, ConfigResult, Configurable, Logger, Server, SerdeDisplay};
+use scsys::prelude::{
+    try_collect_config_files, ConfigResult, Configurable, Logger, SerdeDisplay, Server,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, SerdeDisplay, Serialize)]
