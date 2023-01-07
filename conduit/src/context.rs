@@ -3,10 +3,14 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::Settings;
+use crate::{Settings, OneshotChannels, UnboundedMPSC};
 use scsys::prelude::{Contextual, Hash, Hashable, SerdeDisplay};
 use serde::{Deserialize, Serialize};
 use std::{convert::From, path::PathBuf};
+
+pub fn context_channels() -> OneshotChannels<Context> {
+    tokio::sync::oneshot::channel()
+}
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum Services {
@@ -53,6 +57,18 @@ impl Contextual for Context {
 
     fn context(&self) -> &Self::Ctx {
         self
+    }
+}
+
+impl Into<OneshotChannels<Context>> for Context {
+    fn into(self) -> OneshotChannels<Context> {
+        tokio::sync::oneshot::channel()
+    }
+}
+
+impl Into<UnboundedMPSC<Context>> for Context {
+    fn into(self) -> UnboundedMPSC<Context> {
+        tokio::sync::mpsc::unbounded_channel()
     }
 }
 
