@@ -30,8 +30,9 @@ jobs:
     - name: Import Secrets
       uses: hashicorp/vault-action@v2.4.3
       with:
-        url: ${{ secrets.VAULT_URL }}
+        namespace: admin
         token: ${{ secrets.VAULT_TOKEN }}
+        url: ${{ secrets.VAULT_URL }}
         secrets: |
             secret/docker deployment | DOCKERHUB_TOKEN ;
     - name: Publish to Registry
