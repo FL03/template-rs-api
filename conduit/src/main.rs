@@ -66,6 +66,7 @@ impl Application {
         // Fetch the initialized cli and process the results
         cli.handler(self.ctx.clone()).await?;
         self.set_state(States::Complete).await?;
+        self.set_state(States::Idle).await?;
         Ok(())
     }
 }

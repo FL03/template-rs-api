@@ -11,17 +11,21 @@ pub type OneshotChannels<T> = (oneshot::Sender<T>, oneshot::Receiver<T>);
 
 pub type UnboundedMPSC<T> = (mpsc::UnboundedSender<T>, mpsc::UnboundedReceiver<T>);
 
+
 #[derive(Debug)]
 pub struct AppChannels {
-    pub context: OneshotChannels<Context>,
+    pub ctx: OneshotChannels<Context>,
     pub state: UnboundedMPSC<Locked<State>>,
 }
 
 impl AppChannels {
     pub fn new() -> Self {
-        let context = oneshot::channel();
+        let ctx = oneshot::channel();
         let state = mpsc::unbounded_channel();
-        Self { context, state }
+        Self { ctx, state }
+    }
+    pub fn context(&self) -> &OneshotChannels<Context> {
+        &self.ctx
     }
     pub fn state_channels(&self) -> &UnboundedMPSC<Locked<State>> {
         &self.state

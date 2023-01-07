@@ -15,6 +15,14 @@ pub fn from_context(ctx: crate::Context) -> Api {
     Api::new(ctx.clone())
 }
 
+pub async fn handle(ctx: crate::Context) -> tokio::task::JoinHandle<Api> {
+    tokio::spawn(async move {
+        let api = std::sync::Arc::new(from_context(ctx));
+        api.start().await.expect("");
+        api.as_ref().clone()
+    })
+}
+
 pub(crate) mod interface {
     use crate::{api::routes, Context};
     use acme::net::servers::{Server, ServerSpec};
