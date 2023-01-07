@@ -12,7 +12,7 @@ pub(crate) mod states;
 
 pub mod api;
 pub mod cli;
-pub mod runtime;
+pub mod system;
 
 use acme::prelude::{AppSpec, AsyncSpawnable};
 use scsys::prelude::{AsyncResult, Locked};

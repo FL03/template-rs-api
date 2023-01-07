@@ -5,12 +5,14 @@
 */
 use scsys::AsyncResult;
 
-pub struct Runtime;
+pub struct System {
+    
+}
 
-impl Runtime {
+impl System {
     pub fn new() -> Self {
 
-        Self
+        Self {}
     }
 
     pub async fn runtime(&self) -> AsyncResult {
