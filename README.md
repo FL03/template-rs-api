@@ -1,39 +1,41 @@
 # template-cli-rs
 
-[![Clippy](https://github.com/FL03/template-cli-rs/actions/workflows/clippy.yml/badge.svg)](https://github.com/FL03/template-cli-rs/actions/workflows/clippy.yml)
-[![Docker](https://github.com/FL03/template-cli-rs/actions/workflows/docker.yml/badge.svg)](https://github.com/FL03/template-cli-rs/actions/workflows/docker.yml)
-[![Rust](https://github.com/FL03/template-cli-rs/actions/workflows/rust.yml/badge.svg)](https://github.com/FL03/template-cli-rs/actions/workflows/rust.yml)
+[![Clippy](https://github.com/FL03/conduit/actions/workflows/clippy.yml/badge.svg)](https://github.com/FL03/conduit/actions/workflows/clippy.yml)
+[![Docker](https://github.com/FL03/conduit/actions/workflows/docker.yml/badge.svg)](https://github.com/FL03/conduit/actions/workflows/docker.yml)
+[![Rust](https://github.com/FL03/conduit/actions/workflows/rust.yml/badge.svg)](https://github.com/FL03/conduit/actions/workflows/rust.yml)
 
 ***
 
-template-cli-rs
+conduit
 
-## Installation
+## Getting Started
+
+### Dockerfile
 
 Make sure you have docker installed on the target system
 
-### *Pull the image*
+#### *Pull the image*
 
 ```bash
-docker pull jo3mccain/template-cli-rs:latest
+docker pull jo3mccain/conduit:latest
 ```
 
-### *Build the image locally (optional)*
+#### *Build the image locally (optional)*
 
 ```bash
-docker buildx build --tag jo3mccain/template-cli-rs:latest .
+docker buildx build --tag conduit:latest .
 ```
 
-### *Run the image*
+#### *Run the image*
 
 ```bash
-docker run -P jo3mccain/template-cli-rs:latest
+docker run -p 8080:8080 jo3mccain/conduit:latest
 ```
 
 ## Usage
 
 ```bash
-    cli -h 
+    conduit  
 ```
 
 ## Contributors
@@ -44,5 +46,5 @@ Please make sure to update tests as appropriate.
 
 ## License
 
-* [Apache-2.0](https://choosealicense.com/licenses/apache-2.0/)
-* [MIT](https://choosealicense.com/licenses/mit/)
+- [Apache-2.0](https://choosealicense.com/licenses/apache-2.0/)
+- [MIT](https://choosealicense.com/licenses/mit/)
