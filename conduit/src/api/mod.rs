@@ -25,8 +25,7 @@ pub async fn handle(ctx: crate::Context) -> tokio::task::JoinHandle<Api> {
 
 pub(crate) mod interface {
     use crate::{api::routes, Context};
-    use acme::net::servers::{Server, ServerSpec};
-    use acme::net::WebBackend;
+    use acme::prelude::{servers::{Server, ServerSpec}, WebBackend};
     use axum::Router;
     use http::header::{HeaderName, AUTHORIZATION};
     use scsys::AsyncResult;
@@ -69,7 +68,7 @@ pub(crate) mod interface {
 
         async fn client(&self) -> axum::Router {
             Router::new()
-                .merge(routes::router())
+                .merge(routes::api())
                 .layer(
                     TraceLayer::new_for_http()
                         .make_span_with(DefaultMakeSpan::new().include_headers(true))
