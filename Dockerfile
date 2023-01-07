@@ -1,7 +1,5 @@
 FROM nixos/nix as builder-base
 
-RUN nix
-
 FROM builder-base as builder
 
 ENV CARGO_TERM_COLOR=always
@@ -10,7 +8,8 @@ ADD . /workspace
 WORKDIR /workspace
 
 COPY . .
-RUN nix flake update && nix shell -c cargo build --release --workspace
+RUN nix --extra-experimental-features nix-command --extra-experimental-features flakes flake update
+RUN nix --extra-experimental-features nix-command --extra-experimental-features flakes shell -c cargo build --release --workspace
 
 FROM photon as runner-base
 
