@@ -4,7 +4,7 @@
     Description: ... summary ...
 */
 use crate::Settings;
-use scsys::prelude::Contextual;
+use scsys::prelude::{Contextual, Hash, Hashable, SerdeDisplay};
 use serde::{Deserialize, Serialize};
 use std::{convert::From, path::PathBuf};
 
@@ -15,7 +15,7 @@ pub enum Services {
     Authenticator = 1,
 }
 
-#[derive(Clone, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
+#[derive(Clone, Default, Deserialize, Eq, Hash, PartialEq, SerdeDisplay, Serialize)]
 pub struct Context {
     pub cnf: Settings,
     pub services: Vec<Services>,
@@ -72,7 +72,7 @@ impl std::fmt::Debug for Context {
     }
 }
 
-impl std::fmt::Display for Context {
+impl std::fmt::Display for Services {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,

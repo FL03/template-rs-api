@@ -12,28 +12,33 @@ on:
   workflow_dispatch:
 
 env:
+  DOCKERHUB_USERNAME: jo3mccain
   IMAGE_TAG: latest
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        tags: [ latest ]
     steps:
       - uses: actions/checkout@v3
       - name: Build the Docker image
-        run: docker buildx build --tag ${{ env.DOCKERHUB_USERNAME }}/template-bin-rs:${{ matrix.tags }} .
+        run: docker buildx build --tag conduit:latest .
   publish:
     needs: build
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - name: Import Secrets
+      uses: hashicorp/vault-action@v2.4.0
+      with:
+        url: ${{ secrets.VAULT_URL }}
+        token: ${{ secrets.VAULT_TOKEN }}
+        secrets: |
+            secret/docker deployment | DOCKERHUB_TOKEN ;
     - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@v5
       with:
         dockerfile: Dockerfile
-        name: ${{ env.DOCKERHUB_USERNAME }}/template-bin-rs
+        name: ${{ env.DOCKERHUB_USERNAME }}/conduit
         password: ${{ secrets.DOCKERHUB_TOKEN }}
         snapshot: true
         username: ${{ env.DOCKERHUB_USERNAME }}

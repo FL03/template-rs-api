@@ -7,6 +7,7 @@ use acme::net::WebBackend;
 use clap::Args;
 use scsys::AsyncResult;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
 #[derive(Args, Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct System {
@@ -22,11 +23,11 @@ impl System {
         if self.up {}
         Ok(self)
     }
-    pub async fn handler(&self) -> AsyncResult<&Self> {
+    pub async fn handler(&self, ctx: Arc<crate::Context>) -> AsyncResult<&Self> {
         tracing::debug!("System processing...");
         if self.up {
             tracing::info!("Spawning the api...");
-            let api = crate::api::new();
+            let api = crate::api::Api::new(ctx.as_ref().clone());
             api.serve().await?;
         }
         self.commands()?;

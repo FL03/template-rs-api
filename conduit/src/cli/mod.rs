@@ -17,7 +17,8 @@ pub(crate) mod interface {
     use super::Commands;
     use clap::Parser;
     use serde::{Deserialize, Serialize};
-
+    use std::sync::Arc;
+    
     #[derive(Clone, Debug, Deserialize, Eq, Hash, Parser, PartialEq, Serialize)]
     #[clap(about, author, version)]
     #[clap(long_about = "")]
@@ -33,11 +34,11 @@ pub(crate) mod interface {
     }
 
     impl CommandLineInterface {
-        pub async fn handler(&self) -> scsys::AsyncResult<&Self> {
+        pub async fn handler(&self, ctx: Arc<crate::Context>) -> scsys::AsyncResult<&Self> {
             match self.command.clone() {
                 None => {}
                 Some(v) => {
-                    v.handler().await?;
+                    v.handler(ctx).await?;
                 }
             }
             Ok(self)
