@@ -12,7 +12,6 @@ on:
   workflow_dispatch:
 
 env:
-  DOCKERHUB_USERNAME: jo3mccain
   IMAGE_TAG: latest
 
 jobs:
@@ -27,19 +26,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Import Secrets
-      uses: hashicorp/vault-action@v2.4.3
-      with:
-        namespace: admin
-        token: ${{ secrets.VAULT_TOKEN }}
-        url: ${{ secrets.VAULT_URL }}
-        secrets: |
-            secret/docker deployment | DOCKERHUB_TOKEN ;
     - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@v5
       with:
         dockerfile: Dockerfile
-        name: ${{ env.DOCKERHUB_USERNAME }}/conduit
+        name: ${{ secrets.DOCKERHUB_USERNAME }}/conduit
         password: ${{ secrets.DOCKERHUB_TOKEN }}
         snapshot: true
-        username: ${{ env.DOCKERHUB_USERNAME }}
+        username: ${{ secrets.DOCKERHUB_USERNAME }}

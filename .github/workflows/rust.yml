@@ -50,7 +50,7 @@ jobs:
   publish:
     if: ${{ github.event.inputs.publish }}
     name: Publish
-    needs: [ build, secrets ]
+    needs: [ build ]
     runs-on: ubuntu-latest
     strategy:
       matrix:
