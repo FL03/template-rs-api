@@ -1,34 +1,43 @@
-FROM nixos/nix as builder-base
+FROM rust:latest as base
+
+RUN apt-get update -y && apt-get upgrade -y
+
+FROM base as builder-base
+
+RUN apt-get install -y \
+    protobuf-compiler
 
 FROM builder-base as builder
 
 ENV CARGO_TERM_COLOR=always
 
-ADD . /workspace
-WORKDIR /workspace
+ADD . /app
+WORKDIR /app
 
 COPY . .
-RUN nix --extra-experimental-features nix-command --extra-experimental-features flakes flake update
-RUN nix --extra-experimental-features nix-command --extra-experimental-features flakes shell -c cargo build --release --workspace
+RUN cargo build --release -v --workspace
 
-FROM photon as runner-base
+FROM debian:buster-slim as runner-base
+
+RUN apt-get update -y && apt-get upgrade -y 
+
+RUN apt-get install -y libssl-dev protobuf-compiler
+
+FROM runner-base as runner
 
 ENV RUST_LOG="info" \
-    SERVER_PORT=8080
-
-RUN yum update -y && yum upgrade -y
-
-FROM runner-base as runner 
+    SERVER_PORT=8080 
 
 COPY --chown=55 .config /config
-VOLUME [ "/config" ]
+VOLUME ["/config"]
 
-COPY --from=builder /workspace/target/release/conduit /bin/conduit
+COPY --from=builder /app/target/release/conduit /bin/conduit
 
 FROM runner
 
 EXPOSE 80
 EXPOSE ${SERVER_PORT}
+EXPOSE 6379
 
-ENTRYPOINT [ "app" ]
+ENTRYPOINT [ "conduit" ]
 CMD [ "system", "--up" ]

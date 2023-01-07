@@ -12,7 +12,7 @@ version = "0.1.0"
 
 [[bin]]
 bench = true
-name = "app"
+name = "conduit"
 path = "src/main.rs"
 test = true
 
