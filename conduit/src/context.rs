@@ -13,7 +13,6 @@ pub fn context_channels() -> OneshotChannels<Context> {
     oneshot::channel()
 }
 
-
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, SerdeDisplay, Serialize)]
 pub struct Context {
     pub cnf: Settings,
@@ -21,10 +20,7 @@ pub struct Context {
 }
 
 impl Context {
-    pub fn new(
-        cnf: Option<Settings>,
-        workdir: Option<PathBuf>,
-    ) -> Self {
+    pub fn new(cnf: Option<Settings>, workdir: Option<PathBuf>) -> Self {
         Self {
             cnf: cnf.unwrap_or_default(),
             workdir: workdir.unwrap_or_else(scsys::project_root),

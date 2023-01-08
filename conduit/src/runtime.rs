@@ -15,7 +15,7 @@ pub async fn handle() -> JoinHandle<AsyncResult> {
 
 #[derive(Clone, Debug)]
 pub struct Runtime {
-    pub ctx: Arc<Context>
+    pub ctx: Arc<Context>,
 }
 
 impl Runtime {
@@ -51,9 +51,9 @@ impl Contextual for Runtime {
     type Ctx = Context;
 
     fn context(&self) -> &Self::Ctx {
-        &self.ctx.as_ref()
+        self.ctx.as_ref()
     }
-} 
+}
 
 impl From<Arc<Context>> for Runtime {
     fn from(ctx: Arc<Context>) -> Self {
@@ -72,7 +72,6 @@ impl std::fmt::Display for Runtime {
         write!(f, "{}", serde_json::json!({"ctx": self.ctx.as_ref()}))
     }
 }
-
 
 pub trait RuntimeCliSpec {
     fn base(&self, sc: Command) -> ArgMatches {

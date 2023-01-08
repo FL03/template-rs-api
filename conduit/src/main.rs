@@ -61,7 +61,6 @@ impl Application {
     }
     /// Application runtime
     pub fn runtime(&mut self) -> runtime::Runtime {
-        // Fetch the initialized cli and process the results
         self.runtime.as_ref().clone()
     }
 }
