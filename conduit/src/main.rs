@@ -3,15 +3,15 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{channels::*, commands::*, context::*, settings::*, states::*};
+pub use self::{channels::*, context::*, settings::*, states::*};
 
 pub(crate) mod channels;
-pub(crate) mod commands;
 pub(crate) mod context;
 pub(crate) mod settings;
 pub(crate) mod states;
 
 pub mod api;
+pub mod runtime;
 
 use acme::prelude::{AppSpec, AsyncSpawnable};
 use scsys::prelude::{AsyncResult, Locked};
@@ -35,6 +35,7 @@ async fn main() -> AsyncResult {
 pub struct Application {
     pub channels: AppChannels,
     pub ctx: Arc<Context>,
+    pub runtime: Arc<runtime::Runtime>,
     pub state: Locked<State>,
 }
 
@@ -44,7 +45,8 @@ impl Application {
         let state = States::default().into();
         Self {
             channels,
-            ctx,
+            ctx: ctx.clone(),
+            runtime: Arc::new(runtime::Runtime::new(ctx)),
             state,
         }
     }
@@ -58,13 +60,9 @@ impl Application {
         Ok(self)
     }
     /// Application runtime
-    pub async fn runtime(&mut self) -> AsyncResult {
-        self.set_state(States::Process).await?;
+    pub fn runtime(&mut self) -> runtime::Runtime {
         // Fetch the initialized cli and process the results
-        let cli = handler(self.ctx.clone(), matches()).await?;
-        self.set_state(States::Complete).await?;
-        self.set_state(States::Idle).await?;
-        Ok(())
+        self.runtime.as_ref().clone()
     }
 }
 
@@ -72,7 +70,11 @@ impl Application {
 impl AsyncSpawnable for Application {
     async fn spawn(&mut self) -> AsyncResult<&Self> {
         tracing::debug!("Spawning the application and related services...");
-        self.runtime().await?;
+        self.set_state(States::Process).await?;
+        // Fetch the initialized cli and process the results
+        self.runtime.handler().await?;
+        self.set_state(States::Complete).await?;
+        self.set_state(States::Idle).await?;
         Ok(self)
     }
 }

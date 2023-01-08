@@ -40,4 +40,4 @@ EXPOSE ${SERVER_PORT}
 EXPOSE 6379
 
 ENTRYPOINT [ "conduit" ]
-CMD [ "system", "--up" ]
+CMD [ "--up" ]
