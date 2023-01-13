@@ -32,7 +32,8 @@ async fn handle_error(_err: std::io::Error) -> impl IntoResponse {
 }
 
 pub async fn asset_router(Extension(ctx): Extension<Context>) -> MethodRouter {
-    get_service(ServeDir::new(ctx.workdir().to_str().unwrap())).handle_error(handle_error)
+    let dir = extend_root("dist");
+    get_service(ServeDir::new(dir)).handle_error(handle_error)
 }
 
 pub struct Wasm {

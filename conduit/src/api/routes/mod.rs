@@ -9,6 +9,6 @@ pub mod index;
 
 pub fn api() -> axum::Router {
     axum::Router::new()
-        .merge(index::router())
-        .nest("/app", assets::router())
+        .merge(assets::router())
+        .nest("/api", index::router())
 }
