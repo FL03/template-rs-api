@@ -5,45 +5,63 @@
 */
 use axum::{
     body::{boxed, Body, BoxBody},
-    routing::get,
+    routing::get_service,
     Router,
 };
+use axum_core::response::IntoResponse;
 use http::{Request, Response};
 use hyper::{StatusCode, Uri};
-use tower::util::ServiceExt;
+use scsys::prelude::{project_root, AsyncResult};
 use tower_http::services::ServeDir;
 
-pub fn router() -> Router {
-    Router::new().route("/", get(wasm_handler))
+pub fn extend_root(path: &str) -> String {
+    format!("{}/{}", project_root().to_str().unwrap().to_string(), path)
 }
 
-///
-pub async fn wasm_handler(uri: Uri) -> Result<Response<BoxBody>, (StatusCode, String)> {
-    let dir = "/wasm/pkg";
-    let res = static_assets(dir, uri.clone()).await?;
+pub fn router() -> Router {
+    let path = extend_root("dist");
+    let assets = get_service(ServeDir::new(path)).handle_error(handle_error);
+    Router::new().nest_service("/", assets)
+}
 
-    if res.status() == StatusCode::NOT_FOUND {
-        // try with `.html`
-        // TODO: handle if the Uri has query parameters
-        match format!("{}.html", uri).parse() {
-            Ok(uri_html) => static_assets(dir, uri_html).await,
-            Err(_) => Err((StatusCode::INTERNAL_SERVER_ERROR, "Invalid URI".to_string())),
-        }
-    } else {
-        Ok(res)
+/// Error handler for serving static assets
+async fn handle_error(_err: std::io::Error) -> impl IntoResponse {
+    (StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong...")
+}
+
+
+
+
+pub struct Wasm {
+    pub port: u16,
+    pub workdir: String,
+}
+
+impl Wasm {
+    pub fn new(port: u16, workdir: String) -> Self {
+        Self { port, workdir }
+    }
+    pub fn address(&self) -> std::net::SocketAddr {
+        std::net::SocketAddr::from(([0, 0, 0, 0], self.port))
+    }
+    pub async fn client(&self) -> Router {
+        let serve_dir =
+            get_service(ServeDir::new(self.workdir.as_str())).handle_error(handle_error);
+        Router::new().nest_service("/", serve_dir)
+    }
+    pub async fn serve(&self) -> AsyncResult {
+        axum::Server::bind(&self.address())
+            .serve(self.client().await.into_make_service())
+            .await
+            .unwrap();
+        Ok(())
     }
 }
 
-/// Fetch some static assets from a given directory
-async fn static_assets(dir: &str, uri: Uri) -> Result<Response<BoxBody>, (StatusCode, String)> {
-    let req = Request::builder().uri(uri).body(Body::empty()).unwrap();
-
-    // `ServeDir` implements `tower::Service` so we can call it with `tower::ServiceExt::oneshot`
-    match ServeDir::new(dir).oneshot(req).await {
-        Ok(res) => Ok(res.map(boxed)),
-        Err(err) => Err((
-            StatusCode::INTERNAL_SERVER_ERROR,
-            format!("Something went wrong: {}", err),
-        )),
+impl Default for Wasm {
+    fn default() -> Self {
+        let root = project_root().to_str().unwrap().to_string();
+        let workdir = format!("{}/{}", root, "dist");
+        Wasm::new(8080, workdir)
     }
 }

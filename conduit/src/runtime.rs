@@ -39,8 +39,8 @@ impl Default for Runtime {
 
 impl RuntimeCliSpec for Runtime {
     fn command(&self) -> Command {
-        Command::new("command")
-            .about("Select an availible actor to command")
+        Command::new("rt")
+            .about("Manage the system runtime")
             .arg(arg!(service: -s --service <SERVICE>).action(ArgAction::SetTrue))
     }
 }
