@@ -3,9 +3,11 @@
    Contrib: FL03 <jo3mccain@icloud.com>
    Description: ... Summary ...
 */
+use crate::Context;
 use axum::{
     body::{boxed, Body, BoxBody},
-    routing::get_service,
+    routing::{get_service, MethodRouter},
+    Extension,
     Router,
 };
 use axum_core::response::IntoResponse;
@@ -29,8 +31,9 @@ async fn handle_error(_err: std::io::Error) -> impl IntoResponse {
     (StatusCode::INTERNAL_SERVER_ERROR, "Something went wrong...")
 }
 
-
-
+pub async fn asset_router(Extension(ctx): Extension<Context>) -> MethodRouter {
+    get_service(ServeDir::new(ctx.workdir().to_str().unwrap())).handle_error(handle_error)
+}
 
 pub struct Wasm {
     pub port: u16,

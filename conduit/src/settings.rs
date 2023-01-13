@@ -13,16 +13,14 @@ use serde::{Deserialize, Serialize};
 pub struct Settings {
     pub logger: Logger,
     pub mode: String,
-    pub name: String,
     pub server: Server,
 }
 
 impl Settings {
-    pub fn new(mode: Option<String>, name: Option<String>) -> Self {
+    pub fn new(mode: Option<String>) -> Self {
         Self {
             logger: Default::default(),
             mode: mode.unwrap_or_else(|| String::from("production")),
-            name: name.unwrap_or_else(|| String::from(env!("CARGO_PKG_NAME"))),
             server: Server::new("0.0.0.0".to_string(), 8080),
         }
     }
@@ -30,7 +28,6 @@ impl Settings {
         let mut builder = Config::builder()
             .add_source(Environment::default().separator("__"))
             .set_default("mode", "production")?
-            .set_default("name", env!("CARGO_PKG_NAME"))?
             .set_default("logger.level", "info")?
             .set_default("server.host", "0.0.0.0")?
             .set_default("server.port", 8080)?;
@@ -66,7 +63,7 @@ impl Configurable for Settings {
 
 impl Default for Settings {
     fn default() -> Self {
-        let d = Self::new(None, None);
+        let d = Self::new(None);
         Self::build().unwrap_or(d)
     }
 }

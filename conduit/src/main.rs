@@ -92,7 +92,7 @@ impl AppSpec<Settings> for Application {
     }
 
     fn name(&self) -> String {
-        self.settings().name
+        env!("CARGO_PKG_NAME").to_string()
     }
 
     fn settings(&self) -> Settings {
