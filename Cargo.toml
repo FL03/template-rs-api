@@ -8,6 +8,7 @@ default-members = [
     "conduit"
 ]
 exclude = [
+    "examples/wasm",
     # "xtask"
 ]
 members = [

@@ -5,7 +5,9 @@
 */
 use crate::{Context, State};
 use scsys::prelude::Locked;
-use tokio::sync::{mpsc, oneshot};
+use tokio::sync::{broadcast, mpsc, oneshot};
+
+pub type BroadcastChannels<T> = (broadcast::Sender<T>, broadcast::Receiver<T>);
 
 pub type OneshotChannels<T> = (oneshot::Sender<T>, oneshot::Receiver<T>);
 

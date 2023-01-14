@@ -17,7 +17,7 @@ use acme::prelude::{AppSpec, AsyncSpawnable};
 use scsys::prelude::{AsyncResult, Locked};
 use std::{
     convert::From,
-    sync::{Arc, Mutex},
+    sync::Arc,
 };
 
 #[tokio::main]
@@ -53,7 +53,7 @@ impl Application {
     /// Change the application state
     pub async fn set_state(&mut self, state: States) -> AsyncResult<&Self> {
         // Update the application state
-        self.state = Arc::new(Mutex::new(State::new(None, None, Some(state.clone()))));
+        self.state = state.clone().into();
         // Post the change of state to the according channel(s)
         self.channels.state.0.send(self.state.clone())?;
         tracing::info!("Updating the application state to {}", state);
