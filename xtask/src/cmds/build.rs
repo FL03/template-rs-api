@@ -5,7 +5,7 @@
 */
 use crate::command;
 use anyhow::Result;
-use clap::{Args, ArgAction};
+use clap::{ArgAction, Args};
 
 pub fn builder(release: bool, workspace: bool) -> Result<()> {
     let mut args = vec!["build"];
@@ -25,7 +25,7 @@ pub struct Build {
     #[arg(action = ArgAction::SetTrue, long, short)]
     pub release: bool,
     #[arg(action = ArgAction::SetTrue, long, short)]
-    pub workspace: bool
+    pub workspace: bool,
 }
 
 impl Build {

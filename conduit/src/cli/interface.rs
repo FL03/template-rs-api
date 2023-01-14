@@ -6,7 +6,6 @@
 use clap::{arg, command, value_parser, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
 
-
 pub fn base(sc: Command) -> ArgMatches {
     command!()
         .subcommand(sc)
@@ -40,4 +39,3 @@ pub fn base(sc: Command) -> ArgMatches {
         .arg_required_else_help(true)
         .get_matches()
 }
-

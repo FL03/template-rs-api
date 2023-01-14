@@ -30,7 +30,7 @@ impl Settings {
             .set_default("logger.level", "info")?
             .set_default("server.host", "0.0.0.0")?
             .set_default("server.port", 8080)?;
-        
+
         if let Ok(log) = std::env::var("RUST_LOG") {
             builder = builder.set_override("logger.level", log)?;
         };

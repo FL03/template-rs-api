@@ -6,8 +6,7 @@
 use crate::{api::routes, Context};
 use acme::prelude::{
     servers::{Server, ServerSpec},
-    AsyncSpawnable,
-    WebBackend,
+    AsyncSpawnable, WebBackend,
 };
 use axum::Router;
 use http::header::{HeaderName, AUTHORIZATION};
@@ -29,7 +28,10 @@ pub struct Api {
 impl Api {
     pub fn new(ctx: Arc<Context>) -> Self {
         let server = Server::from(ctx.cnf.server.pieces());
-        Self { ctx, server: Arc::new(server) }
+        Self {
+            ctx,
+            server: Arc::new(server),
+        }
     }
     /// Quickstart the server with the outlined client
     pub async fn start(&self) -> AsyncResult {
@@ -102,4 +104,3 @@ impl WebBackend for Api {
         self.server.as_ref().clone()
     }
 }
-

@@ -6,8 +6,7 @@
 use crate::Context;
 use axum::{
     routing::{get_service, MethodRouter},
-    Extension,
-    Router,
+    Extension, Router,
 };
 use axum_core::response::IntoResponse;
 use hyper::StatusCode;
@@ -15,8 +14,15 @@ use scsys::prelude::{project_root, AsyncResult};
 use tower_http::services::ServeDir;
 
 pub fn router() -> Router {
-    let path = format!("{}/{}", project_root().to_str().unwrap().to_string(), "dist");
-    Router::new().nest_service("/", get_service(ServeDir::new(path)).handle_error(handle_error))
+    let path = format!(
+        "{}/{}",
+        project_root().to_str().unwrap(),
+        "dist"
+    );
+    Router::new().nest_service(
+        "/",
+        get_service(ServeDir::new(path)).handle_error(handle_error),
+    )
 }
 
 /// Error handler for serving static assets
@@ -25,7 +31,7 @@ async fn handle_error(_err: std::io::Error) -> impl IntoResponse {
 }
 
 pub async fn asset_router(Extension(ctx): Extension<Context>) -> MethodRouter {
-    let dir = format!("{}/{}", ctx.workdir().to_str().unwrap().to_string(), "dist");
+    let dir = format!("{}/{}", ctx.workdir().to_str().unwrap(), "dist");
     get_service(ServeDir::new(dir)).handle_error(handle_error)
 }
 

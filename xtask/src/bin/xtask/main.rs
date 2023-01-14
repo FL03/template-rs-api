@@ -6,7 +6,7 @@
 use anyhow::Result;
 use clap::{arg, command, value_parser, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
-use xtask::{cmds::build::Build, auto, setup};
+use xtask::{auto, cmds::build::Build, setup};
 
 fn main() -> Result<()> {
     tracing_subscriber::fmt::init();

@@ -14,11 +14,10 @@ pub async fn handle() -> JoinHandle<AsyncResult> {
     tokio::spawn(async move { Ok(()) })
 }
 
-
 #[derive(Clone, Debug)]
 pub struct Runtime {
     pub ctx: Arc<Context>,
-    pub session: Session
+    pub session: Session,
 }
 
 impl Runtime {

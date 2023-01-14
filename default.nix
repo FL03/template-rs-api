@@ -5,7 +5,7 @@ let
     overlays = [ (import rust-overlay) ];
   };
 
-  rustVersion = "1.66.0";
+  rustVersion = "1.68.0";
 
   rustDefaultTarget = rustPkgs.rust-bin.stable.${rustVersion}.default;
 

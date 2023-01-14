@@ -16,10 +16,7 @@ pub mod runtime;
 
 use acme::prelude::{AppSpec, AsyncSpawnable};
 use scsys::prelude::{AsyncResult, Locked};
-use std::{
-    convert::From,
-    sync::Arc,
-};
+use std::{convert::From, sync::Arc};
 
 #[tokio::main]
 async fn main() -> AsyncResult {
@@ -47,7 +44,7 @@ impl Application {
 
         channels.ctx.0.send(ctx.as_ref().clone()).unwrap();
         channels.state.0.send(state.clone().into()).unwrap();
-        
+
         Self {
             channels,
             ctx: ctx.clone(),
