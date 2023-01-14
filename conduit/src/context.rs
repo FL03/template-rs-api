@@ -7,11 +7,6 @@ use crate::{OneshotChannels, Settings, UnboundedMPSC};
 use scsys::prelude::{Contextual, Hash, Hashable, SerdeDisplay};
 use serde::{Deserialize, Serialize};
 use std::{convert::From, path::PathBuf};
-use tokio::sync::oneshot;
-
-pub fn context_channels() -> OneshotChannels<Context> {
-    oneshot::channel()
-}
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, SerdeDisplay, Serialize)]
 pub struct Context {

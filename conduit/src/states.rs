@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use scsys::prelude::{fnl_remove, Locked, StatePack};
+use scsys::prelude::{fnl_remove, Hash, Hashable, Locked, StatePack};
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 use strum::{EnumString, EnumVariantNames};

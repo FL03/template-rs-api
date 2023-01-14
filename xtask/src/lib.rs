@@ -8,6 +8,7 @@ pub use self::{commands::*, primitives::*, utils::*};
 pub(crate) mod commands;
 pub(crate) mod utils;
 
+pub mod cmds;
 pub mod pipelines;
 
 ///

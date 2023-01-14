@@ -11,6 +11,7 @@ pub(crate) mod settings;
 pub(crate) mod states;
 
 pub mod api;
+pub mod cli;
 pub mod runtime;
 
 use acme::prelude::{AppSpec, AsyncSpawnable};
@@ -42,12 +43,16 @@ pub struct Application {
 impl Application {
     pub fn new(ctx: Arc<Context>) -> Self {
         let channels = AppChannels::new();
-        let state = States::default().into();
+        let state = States::default();
+
+        channels.ctx.0.send(ctx.as_ref().clone()).unwrap();
+        channels.state.0.send(state.clone().into()).unwrap();
+        
         Self {
             channels,
             ctx: ctx.clone(),
             runtime: Arc::new(runtime::Runtime::new(ctx)),
-            state,
+            state: state.into(),
         }
     }
     /// Change the application state
@@ -60,8 +65,8 @@ impl Application {
         Ok(self)
     }
     /// Application runtime
-    pub fn runtime(&mut self) -> runtime::Runtime {
-        self.runtime.as_ref().clone()
+    pub fn runtime(&self) -> &runtime::Runtime {
+        self.runtime.as_ref()
     }
 }
 
@@ -71,7 +76,7 @@ impl AsyncSpawnable for Application {
         tracing::debug!("Spawning the application and related services...");
         self.set_state(States::Process).await?;
         // Fetch the initialized cli and process the results
-        self.runtime.handler().await?;
+        self.runtime().handler().await?;
         self.set_state(States::Complete).await?;
         self.set_state(States::Idle).await?;
         Ok(self)

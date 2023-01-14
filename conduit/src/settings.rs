@@ -26,21 +26,23 @@ impl Settings {
     }
     pub fn build() -> ConfigResult<Self> {
         let mut builder = Config::builder()
-            .add_source(Environment::default().separator("__"))
             .set_default("mode", "production")?
             .set_default("logger.level", "info")?
             .set_default("server.host", "0.0.0.0")?
             .set_default("server.port", 8080)?;
-
-        if let Ok(files) = try_collect_config_files("**/*.config.*", false) {
-            builder = builder.add_source(files);
-        }
+        
         if let Ok(log) = std::env::var("RUST_LOG") {
             builder = builder.set_override("logger.level", log)?;
         };
         if let Ok(port) = std::env::var("SERVER_PORT") {
             builder = builder.set_override("server.port", port)?;
         };
+        // Add in related environment variables
+        builder = builder.add_source(Environment::default().separator("__"));
+        // Try gathering valid configuration files...
+        if let Ok(files) = try_collect_config_files("**/*.config.*", false) {
+            builder = builder.add_source(files);
+        }
         builder.build()?.try_deserialize()
     }
 

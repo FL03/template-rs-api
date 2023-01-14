@@ -6,7 +6,7 @@
 use anyhow::Result;
 use clap::{arg, command, value_parser, ArgAction, ArgMatches, Command};
 use std::path::PathBuf;
-use xtask::{auto, builder, setup};
+use xtask::{cmds::build::Build, auto, setup};
 
 fn main() -> Result<()> {
     tracing_subscriber::fmt::init();
@@ -23,7 +23,7 @@ fn main() -> Result<()> {
                 auto()?;
             }
             if sub_matches.get_one::<bool>("build").is_some() {
-                builder(release, workspace)?;
+                Build::new(release, workspace).process()?;
             }
             if sub_matches.get_one::<bool>("setup").is_some() {
                 setup(true, false)?;

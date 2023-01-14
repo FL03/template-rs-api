@@ -10,21 +10,8 @@ pub fn auto() -> Result<()> {
     command("cargo", vec!["fmt", "--all"])?;
     command("cargo", vec!["clippy", "--all", "--allow-dirty", "--fix"])?;
     for i in [true, false] {
-        builder(i, true)?;
+        crate::cmds::build::Build::new(i, true).process()?;
     }
-    Ok(())
-}
-
-pub fn builder(release: bool, workspace: bool) -> Result<()> {
-    let mut args = vec!["build"];
-
-    if release {
-        args.push("--release");
-    }
-    if workspace {
-        args.push("--workspace");
-    }
-    command("cargo", args)?;
     Ok(())
 }
 
