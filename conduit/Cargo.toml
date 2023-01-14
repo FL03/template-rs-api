@@ -21,6 +21,7 @@ test = true
 [dependencies]
 # Custom crates
 acme = { features = ["net"], git = "https://github.com/FL03/acme", branch = "v0.2.5", version = "0.2.5" }
+decanter = { features = ["derive"], version = "0.1.1" }
 scsys = { features = ["full"], version = "0.1.40" }
 
 # Standard dependencies

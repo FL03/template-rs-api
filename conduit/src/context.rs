@@ -4,7 +4,8 @@
     Description: ... summary ...
 */
 use crate::{OneshotChannels, Settings, UnboundedMPSC};
-use scsys::prelude::{Contextual, Hash, Hashable, SerdeDisplay};
+use decanter::prelude::{Hash, Hashable};
+use scsys::prelude::{Contextual, SerdeDisplay};
 use serde::{Deserialize, Serialize};
 use std::{convert::From, path::PathBuf};
 

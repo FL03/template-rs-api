@@ -3,6 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
+use decanter::prelude::{Hash, Hashable};
 use scsys::prelude::config::{Config, Environment};
 use scsys::prelude::{
     try_collect_config_files, ConfigResult, Configurable, Logger, SerdeDisplay, Server,
