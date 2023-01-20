@@ -3,39 +3,31 @@
    Contrib: FL03 <jo3mccain@icloud.com>
    Description: ... Summary ...
 */
-use clap::{arg, command, value_parser, ArgAction, ArgMatches, Command};
-use std::path::PathBuf;
+use crate::cli::cmd::Commands;
+use clap::{ArgAction, Parser};
+use serde::{Deserialize, Serialize};
 
-pub fn base(sc: Command) -> ArgMatches {
-    command!()
-        .subcommand(sc)
-        .arg(
-            arg!(
-                -c --config <FILE> "Sets a custom config file"
-            )
-            // We don't have syntax yet for optional options, so manually calling `required`
-            .required(false)
-            .value_parser(value_parser!(PathBuf))
-            .default_value("/config/Conduit.toml"),
-        )
-        .arg(
-            arg!(debug: -d --debug)
-                .action(ArgAction::SetTrue)
-                .help("Optionally startup the debugger"),
-        )
-        .arg(
-            arg!(release: -r --release)
-                .action(ArgAction::SetTrue)
-                .help("Optionally startup application in release mode"),
-        )
-        .arg(
-            arg!(up: -u --up)
-                .action(ArgAction::SetTrue)
-                .help("Signals for a system to turn on"),
-        )
-        .arg(arg!(verbose: -v --verbose).action(ArgAction::SetTrue))
-        .propagate_version(true)
-        .subcommand_required(false)
-        .arg_required_else_help(true)
-        .get_matches()
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Parser, PartialEq, Serialize)]
+#[clap(about, author, long_about = None, version)]
+#[command(arg_required_else_help(true), allow_missing_positional(true))]
+pub struct CommandLineInterface {
+    #[clap(subcommand)]
+    pub command: Option<Commands>,
+    #[arg(action = ArgAction::SetTrue, default_value_t = false, long, short)]
+    pub debug: bool,
+}
+
+impl CommandLineInterface {
+    pub fn command(&self) -> Option<Commands> {
+        self.command.clone()
+    }
+    pub fn debug(&self) -> bool {
+        self.debug
+    }
+}
+
+impl Default for CommandLineInterface {
+    fn default() -> Self {
+        Self::parse()
+    }
 }

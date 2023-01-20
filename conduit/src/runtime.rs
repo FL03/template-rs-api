@@ -3,9 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::{Context, Settings};
+use crate::{api::Api, Context, Settings, cli::{cmd::Commands, CommandLineInterface}};
 use acme::prelude::{AsyncSpawnable, Session};
-use clap::{arg, ArgAction, ArgMatches, Command};
+use clap::Parser;
 use scsys::prelude::{AsyncResult, Contextual};
 use std::sync::Arc;
 use tokio::task::JoinHandle;
@@ -16,19 +16,35 @@ pub async fn handle() -> JoinHandle<AsyncResult> {
 
 #[derive(Clone, Debug)]
 pub struct Runtime {
+    pub api: Arc<Api>,
+    pub cli: Arc<CommandLineInterface>,
     pub ctx: Arc<Context>,
     pub session: Session,
 }
 
 impl Runtime {
     pub fn new(ctx: Arc<Context>) -> Self {
+        let api = Arc::new(Api::from(ctx.as_ref().clone()));
+        let cli = Arc::new(CommandLineInterface::parse());
         let session = Session::default();
-        Self { ctx, session }
+        Self { api, cli, ctx, session }
     }
     pub async fn handler(&self) -> AsyncResult<&Self> {
-        if let Some(_up) = self.matches().get_one::<bool>("up") {
-            crate::api::Api::from(self.ctx.clone()).spawn().await?;
+        let mut api = self.api.as_ref().clone();
+        let cli = self.cli.clone();
+
+        if let Some(cmd) = cli.command() {
+            match cmd {
+                Commands::System(sys) => {
+                    if sys.up {
+                        tracing::info!("Message Recieved: System initializing...");
+                        api.spawn().await?;
+                    }
+                    
+                }
+            }
         }
+        
         Ok(self)
     }
 }
@@ -36,14 +52,6 @@ impl Runtime {
 impl Default for Runtime {
     fn default() -> Self {
         Self::new(Arc::new(Context::default()))
-    }
-}
-
-impl RuntimeCliSpec for Runtime {
-    fn command(&self) -> Command {
-        Command::new("rt")
-            .about("Manage the system runtime")
-            .arg(arg!(service: -s --service <SERVICE>).action(ArgAction::SetTrue))
     }
 }
 
@@ -76,11 +84,8 @@ impl std::fmt::Display for Runtime {
 }
 
 pub trait RuntimeCliSpec {
-    fn base(&self, sc: Command) -> ArgMatches {
-        crate::cli::base(sc)
-    }
-    fn command(&self) -> Command;
-    fn matches(&self) -> ArgMatches {
-        self.base(self.command())
-    }
+    type Cmd: clap::Subcommand;
+    type Cli: clap::Parser;
+    
+    fn command(&self) -> Option<Self::Cmd>;
 }

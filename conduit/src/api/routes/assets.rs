@@ -14,11 +14,7 @@ use scsys::prelude::{project_root, AsyncResult};
 use tower_http::services::ServeDir;
 
 pub fn router() -> Router {
-    let path = format!(
-        "{}/{}",
-        project_root().to_str().unwrap(),
-        "dist"
-    );
+    let path = project_root().join("examples/service");
     Router::new().nest_service(
         "/",
         get_service(ServeDir::new(path)).handle_error(handle_error),

@@ -39,7 +39,7 @@ impl Settings {
             builder = builder.set_override("server.port", port)?;
         };
         // Add in related environment variables
-        builder = builder.add_source(Environment::default().separator("__"));
+        builder = builder.add_source(Environment::default().separator("__").prefix(env!("CARGO_PKG_NAME").to_ascii_uppercase().as_str()));
         // Try gathering valid configuration files...
         if let Ok(files) = try_collect_config_files("**/*.config.*", false) {
             builder = builder.add_source(files);

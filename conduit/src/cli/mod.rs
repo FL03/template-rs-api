@@ -5,4 +5,5 @@
 */
 pub use self::interface::*;
 
+pub mod cmd;
 pub(crate) mod interface;
