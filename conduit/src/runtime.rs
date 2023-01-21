@@ -10,8 +10,14 @@ use scsys::prelude::{AsyncResult, Contextual};
 use std::sync::Arc;
 use tokio::task::JoinHandle;
 
-pub async fn handle() -> JoinHandle<AsyncResult> {
-    tokio::spawn(async move { Ok(()) })
+pub async fn handle(ctx: Arc<Context>) -> JoinHandle<AsyncResult> {
+    let rt: Arc<Runtime> = Runtime::new(ctx).into();
+
+    tokio::spawn(async move {
+        rt.handler().await?;
+
+        Ok(())
+    })
 }
 
 #[derive(Clone, Debug)]
