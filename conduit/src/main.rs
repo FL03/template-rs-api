@@ -29,53 +29,49 @@ async fn main() -> AsyncResult {
     Ok(())
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Application {
-    pub channels: AppChannels,
     pub ctx: Arc<Context>,
-    pub runtime: Arc<runtime::Runtime>,
+    pub rt: Arc<runtime::Runtime>,
     pub state: Locked<State>,
 }
 
 impl Application {
     pub fn new(ctx: Arc<Context>) -> Self {
-        let channels = AppChannels::new();
         let state = States::default();
 
-        channels.ctx.0.send(ctx.as_ref().clone()).unwrap();
-        channels.state.0.send(state.clone().into()).unwrap();
-
         Self {
-            channels,
             ctx: ctx.clone(),
-            runtime: Arc::new(runtime::Runtime::new(ctx)),
+            rt: Arc::new(runtime::Runtime::from(ctx)),
             state: state.into(),
         }
     }
-    /// Change the application state
-    pub async fn set_state(&mut self, state: States) -> AsyncResult<&Self> {
-        // Update the application state
-        self.state = state.clone().into();
-        // Post the change of state to the according channel(s)
-        self.channels.state.0.send(self.state.clone())?;
-        tracing::info!("Updating the application state to {}", state);
-        Ok(self)
-    }
     /// Application runtime
     pub fn runtime(&self) -> &runtime::Runtime {
-        self.runtime.as_ref()
+        self.rt.as_ref()
     }
 }
 
 #[async_trait::async_trait]
 impl AsyncSpawnable for Application {
     async fn spawn(&mut self) -> AsyncResult<&Self> {
+        let ctx_chan = tokio::sync::watch::channel(self.ctx.clone());
+        ctx_chan.0.send(self.ctx.clone()).expect("Context channel droppped...");
+
+        let state_chan = tokio::sync::watch::channel(self.state.clone());
+        state_chan.0.send(self.state.clone()).expect("State channel droppped...");
+
         tracing::debug!("Spawning the application and related services...");
-        self.set_state(States::Process).await?;
+        self.state = States::Process.into();
+        state_chan.0.send(self.state.clone()).expect("State channel droppped...");
         // Fetch the initialized cli and process the results
         self.runtime().handler().await?;
-        self.set_state(States::Complete).await?;
-        self.set_state(States::Idle).await?;
+        // Signal process completion with a change of state
+        self.state = States::Complete.into();
+        state_chan.0.send(self.state.clone()).expect("State channel droppped...");
+        // Resume default application behaviour
+        self.state = States::Idle.into();
+        state_chan.0.send(self.state.clone()).expect("State channel droppped...");
         Ok(self)
     }
 }

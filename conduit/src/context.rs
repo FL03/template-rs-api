@@ -9,7 +9,7 @@ use scsys::prelude::{Contextual, SerdeDisplay};
 use serde::{Deserialize, Serialize};
 use std::{convert::From, path::PathBuf};
 
-#[derive(Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, SerdeDisplay, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, SerdeDisplay, Serialize)]
 pub struct Context {
     pub cnf: Settings,
     pub workdir: PathBuf,
@@ -31,6 +31,12 @@ impl Context {
     }
     pub fn workdir(&self) -> &PathBuf {
         &self.workdir
+    }
+}
+
+impl Default for Context {
+    fn default() -> Self {
+        Self::new(None, None)
     }
 }
 
