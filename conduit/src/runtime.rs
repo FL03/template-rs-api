@@ -20,7 +20,6 @@ pub async fn handle_cli(mut api: Api, cli: CommandLineInterface) -> AsyncResult 
                     tracing::info!("Message Recieved: System initializing...");
                     api.spawn().await?;
                 }
-                
             }
         }
     }
@@ -33,7 +32,7 @@ pub enum Surfaces {
     CLI = 1,
     RPC = 2,
     P2P = 3,
-    WebRTC = 4
+    WebRTC = 4,
 }
 
 pub struct Interface<T>(T, Surfaces);
@@ -48,15 +47,15 @@ pub struct Runtime {
 
 impl Runtime {
     pub fn new(ctx: Arc<Context>, session: Session) -> Self {
-        Self { 
+        Self {
             api: Api::from(ctx.as_ref().clone()).into(),
             cli: CommandLineInterface::parse().into(),
             ctx: watch::channel(ctx.clone()).1,
-            session
+            session,
         }
     }
     pub async fn handle(&self) -> JoinHandle<AsyncResult> {
-        let rt  = Arc::new(self.clone());
+        let rt = Arc::new(self.clone());
         let ctx = watch::channel(self.ctx.clone());
 
         tokio::spawn(async move {
@@ -74,9 +73,8 @@ impl Runtime {
         })
     }
     pub async fn handler(&self) -> AsyncResult<&Self> {
-
         handle_cli(self.api.as_ref().clone(), self.cli.as_ref().clone()).await?;
-        
+
         Ok(self)
     }
 }
@@ -101,13 +99,17 @@ impl From<Context> for Runtime {
 
 impl std::fmt::Display for Runtime {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", serde_json::json!({"ctx": self.ctx.borrow().as_ref().clone() }))
+        write!(
+            f,
+            "{}",
+            serde_json::json!({"ctx": self.ctx.borrow().as_ref().clone() })
+        )
     }
 }
 
 pub trait RuntimeCliSpec {
     type Cmd: clap::Subcommand;
     type Cli: clap::Parser;
-    
+
     fn command(&self) -> Option<Self::Cmd>;
 }

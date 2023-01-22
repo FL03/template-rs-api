@@ -56,22 +56,37 @@ impl Application {
 impl AsyncSpawnable for Application {
     async fn spawn(&mut self) -> AsyncResult<&Self> {
         let ctx_chan = tokio::sync::watch::channel(self.ctx.clone());
-        ctx_chan.0.send(self.ctx.clone()).expect("Context channel droppped...");
+        ctx_chan
+            .0
+            .send(self.ctx.clone())
+            .expect("Context channel droppped...");
 
         let state_chan = tokio::sync::watch::channel(self.state.clone());
-        state_chan.0.send(self.state.clone()).expect("State channel droppped...");
+        state_chan
+            .0
+            .send(self.state.clone())
+            .expect("State channel droppped...");
 
         tracing::debug!("Spawning the application and related services...");
         self.state = States::Process.into();
-        state_chan.0.send(self.state.clone()).expect("State channel droppped...");
+        state_chan
+            .0
+            .send(self.state.clone())
+            .expect("State channel droppped...");
         // Fetch the initialized cli and process the results
         self.runtime().handler().await?;
         // Signal process completion with a change of state
         self.state = States::Complete.into();
-        state_chan.0.send(self.state.clone()).expect("State channel droppped...");
+        state_chan
+            .0
+            .send(self.state.clone())
+            .expect("State channel droppped...");
         // Resume default application behaviour
         self.state = States::Idle.into();
-        state_chan.0.send(self.state.clone()).expect("State channel droppped...");
+        state_chan
+            .0
+            .send(self.state.clone())
+            .expect("State channel droppped...");
         Ok(self)
     }
 }

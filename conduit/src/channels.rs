@@ -21,5 +21,5 @@ pub enum Channel {
     Broadcast,
     MPSC,
     Oneshot,
-    Unbounded
+    Unbounded,
 }

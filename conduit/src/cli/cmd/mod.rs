@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize, Subcommand)]
 pub enum Commands {
-    System(System)
+    System(System),
 }
 
 impl Default for Commands {
