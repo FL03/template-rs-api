@@ -9,7 +9,7 @@ use acme::prelude::{AsyncSpawnable, Session};
 use clap::Parser;
 use scsys::prelude::AsyncResult;
 use std::sync::Arc;
-use tokio::sync::{oneshot, watch};
+use tokio::sync::watch;
 use tokio::task::JoinHandle;
 
 pub async fn handle_cli(mut api: Api, cli: CommandLineInterface) -> AsyncResult {
@@ -46,7 +46,6 @@ impl Runtime {
     }
     pub async fn handle(&self) -> JoinHandle<AsyncResult> {
         let rt = Arc::new(self.clone());
-        let ctx = watch::channel(self.ctx.clone());
 
         tokio::spawn(async move {
             let api = rt.api.clone();
@@ -95,11 +94,4 @@ impl std::fmt::Display for Runtime {
             serde_json::json!({"ctx": self.ctx.borrow().as_ref().clone() })
         )
     }
-}
-
-pub trait RuntimeCliSpec {
-    type Cmd: clap::Subcommand;
-    type Cli: clap::Parser;
-
-    fn command(&self) -> Option<Self::Cmd>;
 }

@@ -1,7 +1,7 @@
 [package]
 categories = []
 keywords = ["app", "binary", "clap", "cli", "template"]
-name = "conduit"
+name = "template-api-rs"
 
 authors.workspace = true
 description.workspace = true
@@ -13,7 +13,7 @@ version.workspace = true
 
 [[bin]]
 bench = true
-name = "conduit"
+name = "template-api-rs"
 path = "src/main.rs"
 test = true
 
