@@ -27,16 +27,6 @@ pub async fn handle_cli(mut api: Api, cli: CommandLineInterface) -> AsyncResult 
     Ok(())
 }
 
-pub enum Surfaces {
-    API = 0,
-    CLI = 1,
-    RPC = 2,
-    P2P = 3,
-    WebRTC = 4,
-}
-
-pub struct Interface<T>(T, Surfaces);
-
 #[derive(Clone, Debug)]
 pub struct Runtime {
     pub api: Arc<Api>,
