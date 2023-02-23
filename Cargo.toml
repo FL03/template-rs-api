@@ -1,14 +1,14 @@
 [workspace.package]
-authors = ["FL03 <jo3mccain@icloud.com> (https://github.com/FL03)"]
+authors = ["FL03 <jo3mccain@icloud.com> (https://gitlab.com/FL03)"]
 categories = []
-description = "Conduit is a complete application template for creating Rust binarys"
+description = "template-api-rs is a complete template for creating high-preformance RESTful API's in Rust"
 edition = "2021"
 keywords = []
-homepage = "https://github.com/FL03/conduit/wiki"
+homepage = "https://gitlab.com/pzzld/templates/template-api-rs/wiki"
 license = "Apache-2.0"
 readme = "README.md"
-repository = "https://github.com/FL03/conduit"
-version = "0.1.0"
+repository = "https://gitlab.com/pzzld/templates/template-api-rs"
+version = "0.0.2"
 
 [workspace]
 default-members = [
