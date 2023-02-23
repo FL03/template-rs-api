@@ -3,10 +3,10 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{channels::*, context::*, settings::*, states::*};
+pub use self::{context::*, primitives::*, settings::*, states::*};
 
-pub(crate) mod channels;
 pub(crate) mod context;
+pub(crate) mod primitives;
 pub(crate) mod settings;
 pub(crate) mod states;
 

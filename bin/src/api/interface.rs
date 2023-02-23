@@ -39,12 +39,6 @@ impl Api {
     }
 }
 
-impl From<Api> for Context {
-    fn from(d: Api) -> Context {
-        d.ctx.as_ref().clone()
-    }
-}
-
 impl From<Arc<Context>> for Api {
     fn from(ctx: Arc<Context>) -> Self {
         Self::new(ctx)
