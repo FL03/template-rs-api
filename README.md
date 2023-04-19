@@ -1,12 +1,12 @@
-# template-cli-rs
+# template-rs-api
 
-[![Clippy](https://github.com/FL03/conduit/actions/workflows/clippy.yml/badge.svg)](https://github.com/FL03/conduit/actions/workflows/clippy.yml)
-[![Docker](https://github.com/FL03/conduit/actions/workflows/docker.yml/badge.svg)](https://github.com/FL03/conduit/actions/workflows/docker.yml)
-[![Rust](https://github.com/FL03/conduit/actions/workflows/rust.yml/badge.svg)](https://github.com/FL03/conduit/actions/workflows/rust.yml)
+[![Clippy](https://github.com/FL03/template-rs-api/actions/workflows/clippy.yml/badge.svg)](https://github.com/FL03/template-rs-api/actions/workflows/clippy.yml)
+[![Docker](https://github.com/FL03/template-rs-api/actions/workflows/docker.yml/badge.svg)](https://github.com/FL03/template-rs-api/actions/workflows/docker.yml)
+[![Rust](https://github.com/FL03/template-rs-api/actions/workflows/rust.yml/badge.svg)](https://github.com/FL03/template-rs-api/actions/workflows/rust.yml)
 
 ***
 
-conduit
+Welcome, this is a template for a RESTful API written in Rust leveraging the [Axum](https://docs.rs/axum) framework.
 
 ## Getting Started
 
@@ -17,25 +17,25 @@ Make sure you have docker installed on the target system
 #### *Pull the image*
 
 ```bash
-docker pull jo3mccain/conduit:latest
+docker pull jo3mccain/template-rs-api:latest
 ```
 
 #### *Build the image locally (optional)*
 
 ```bash
-docker buildx build --tag conduit:latest .
+docker buildx build --tag template-rs-api:latest .
 ```
 
 #### *Run the image*
 
 ```bash
-docker run -p 8080:8080 jo3mccain/conduit:latest
+docker run -p 8080:8080 jo3mccain/template-rs-api:latest system --up
 ```
 
 ## Usage
 
 ```bash
-    conduit  
+    template-rs-api [FLAGS] [OPTIONS] <SUBCOMMAND>
 ```
 
 ## Contributors
