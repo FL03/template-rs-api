@@ -20,8 +20,9 @@ use tokio::sync::mpsc;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    let _ = api::Api::default().with_tracing().serve().await?;
     // Create an application instance
-    let _app = Application::default().init().spawn().await??;
+    // let _app = Application::default().init().spawn().await??;
 
     Ok(())
 }
