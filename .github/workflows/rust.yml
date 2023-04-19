@@ -5,10 +5,10 @@ env:
 
 on:
   pull_request:
-    branches: [ "main", "master", "prod*" ]
+    branches-ignore: [ "beta*", "dev*", "next*" ]
   push:
-    branches: [ "main", "master", "prod*" ]
-    tags: [ "v*.*.*" ]
+    branches-ignore: [ "beta*", "dev*", "next*" ]
+    tags: [ "nightly*",  "v*.*.*" ]
   release:
     types: [ created ]
   schedule:

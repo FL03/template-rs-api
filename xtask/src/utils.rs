@@ -7,6 +7,14 @@ use anyhow::Result;
 use std::path::{Path, PathBuf};
 use std::{collections::HashMap, fs, io, process::Command};
 
+pub fn cargo(cmd: &str, args: Vec<&str>) -> Result<()> {
+    let mut command = Command::new("cargo");
+    command.current_dir(project_root());
+    command.arg(cmd);
+    command.args(args);
+    command.status()?;
+    Ok(())
+}
 ///
 pub fn command(program: &str, args: Vec<&str>) -> Result<()> {
     let mut cmd = Command::new(program);
@@ -55,4 +63,29 @@ pub fn project_root() -> PathBuf {
         .nth(1)
         .unwrap()
         .to_path_buf()
+}
+
+pub struct Cargo {
+    queue: Vec<(String, Vec<String>)>,
+}
+
+impl Cargo {
+    pub fn new() -> Self {
+        Self {
+            queue: Vec::new(),
+        }
+    }
+    pub fn add(&mut self, command: String, args: Vec<String>) {
+        self.queue.push((command, args));
+    }
+    pub fn run(&self) -> Result<()> {
+        for (cmd, args) in self.queue.clone() {
+            let mut command = Command::new("cargo");
+            command.current_dir(project_root());
+            command.arg(cmd);
+            command.args(args);
+            command.status()?;
+        }
+        Ok(())
+    }
 }
