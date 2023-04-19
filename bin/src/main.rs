@@ -15,15 +15,15 @@ pub mod cli;
 pub mod runtime;
 
 
-use std::{convert::From, sync::Arc};
+use std::sync::{Arc, Mutex};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    let api = api::new();
+    api.serve().await?;
     // Create an application instance
-    let mut app = Application::default();
-    // Quickstart the application runtime with the following command
-    app.setup()?;
-    app.spawn().await?;
+    // let mut app = Application::default().setup();
+    // app.spawn().await?;
 
     Ok(())
 }
@@ -37,60 +37,33 @@ pub struct Application {
 
 impl Application {
     pub fn new(ctx: Arc<Context>) -> Self {
-        let state = State::default();
-
         Self {
             ctx: ctx.clone(),
             rt: Arc::new(runtime::Runtime::from(ctx)),
-            state: state.into(),
+            state: Arc::new(Mutex::new(State::default())),
         }
     }
     /// Application runtime
     pub fn runtime(&self) -> &runtime::Runtime {
         self.rt.as_ref()
     }
-    pub async fn spawn(&mut self) -> anyhow::Result<&Self> {
-        let ctx_chan = tokio::sync::watch::channel(self.ctx.clone());
-        ctx_chan
-            .0
-            .send(self.ctx.clone())
-            .expect("Context channel droppped...");
-
-        let state_chan = tokio::sync::watch::channel(self.state.clone());
-        state_chan
-            .0
-            .send(self.state.clone())
-            .expect("State channel droppped...");
-
-        tracing::debug!("Spawning the application and related services...");
-        self.state = State::Process.into();
-        state_chan
-            .0
-            .send(self.state.clone())
-            .expect("State channel droppped...");
-        // Fetch the initialized cli and process the results
-        self.runtime().handler().await?;
-        // Signal process completion with a change of state
-        self.state = State::Complete.into();
-        state_chan
-            .0
-            .send(self.state.clone())
-            .expect("State channel droppped...");
-        // Resume default application behaviour
-        self.state = State::Idle.into();
-        state_chan
-            .0
-            .send(self.state.clone())
-            .expect("State channel droppped...");
-        Ok(self)
+    pub async fn spawn(&mut self) -> anyhow::Result<()> {
+        Ok(loop {
+            tokio::select! {
+                _ = self.runtime().handle() => {
+                    tracing::info!("Message Recieved: Shutting down...");
+                    break;
+                }
+                _ = tokio::signal::ctrl_c() => {
+                    tracing::info!("Message Recieved: Shutting down...");
+                    break;
+                }
+            }
+        })
     }
 
     pub fn init(self) -> Self {
         self
-    }
-
-    pub fn context(&self) -> Context {
-        self.ctx.clone()
     }
 
     pub fn name(&self) -> String {
@@ -100,12 +73,11 @@ impl Application {
     pub fn settings(&self) -> Settings {
         self.ctx.settings().clone()
     }
-
-    pub fn setup(&mut self) -> anyhow::Result<&Self> {
-        self.settings().logger().clone().setup(None);
-        tracing_subscriber::fmt::init();
-        tracing::debug!("Application initialized; completing setup...");
-        Ok(self)
+    pub fn setup(self) -> Self {
+        // Initialize tracing layer...
+        let logger = self.ctx.settings().logger.clone();
+        logger.setup_env(None).init_tracing();
+        self
     }
 
     pub fn state(&self) -> &Locked<State> {

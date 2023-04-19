@@ -16,7 +16,7 @@ pub async fn handle_cli(mut api: Api, cli: CommandLineInterface) -> anyhow::Resu
             Commands::System(sys) => {
                 if sys.up {
                     tracing::info!("Message Recieved: System initializing...");
-                    api.spawn().await?;
+                    api.serve().await?;
                 }
             }
         }

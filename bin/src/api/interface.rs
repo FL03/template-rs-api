@@ -67,14 +67,10 @@ impl Api {
     pub async fn serve(&self) -> anyhow::Result<()> {
         tracing::info!("Starting the server...");
         self.builder()
-            .serve(self.client().awaitclient.into_make_service())
+            .serve(self.client().await.into_make_service())
             .with_graceful_shutdown(shutdown())
             .await?;
         Ok(())
-    }
-    pub async fn spawn(&mut self) -> anyhow::Result<&Self> {
-        self.server().serve(self.client().await).await?;
-        Ok(self)
     }
 }
 

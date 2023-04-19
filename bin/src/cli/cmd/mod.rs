@@ -4,12 +4,14 @@
    Description: ... Summary ...
 */
 pub use self::system::System;
-pub(crate) mod system;
+
+mod system;
 
 use clap::Subcommand;
 use serde::{Deserialize, Serialize};
+use strum::Display;
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize, Subcommand)]
+#[derive(Clone, Debug, Deserialize, Display, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Subcommand)]
 pub enum Commands {
     System(System),
 }

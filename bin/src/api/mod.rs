@@ -22,7 +22,7 @@ pub fn from_context(ctx: crate::Context) -> Api {
 pub async fn handle(ctx: Arc<crate::Context>) -> tokio::task::JoinHandle<Api> {
     tokio::spawn(async move {
         let api = Arc::new(from_context(ctx.as_ref().clone()));
-        api.start().await.expect("");
+        api.serve().await.expect("");
         api.as_ref().clone()
     })
 }

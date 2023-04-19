@@ -6,7 +6,7 @@
 use clap::{ArgAction, Args};
 use serde::{Deserialize, Serialize};
 
-#[derive(Args, Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
+#[derive(Args, Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct System {
     #[clap(long, short)]
     pub config: Option<std::path::PathBuf>,
@@ -17,5 +17,11 @@ pub struct System {
 impl System {
     pub async fn handle(&self) -> anyhow::Result<&Self> {
         Ok(self)
+    }
+}
+
+impl std::fmt::Display for System {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap())
     }
 }

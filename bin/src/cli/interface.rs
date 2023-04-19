@@ -6,7 +6,6 @@
 use crate::cli::cmd::Commands;
 use clap::{ArgAction, Parser};
 use serde::{Deserialize, Serialize};
-use std::net::SocketAddr;
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, Parser, PartialEq, PartialOrd, Serialize)]
 #[clap(about, author, long_about = None, version)]
@@ -14,8 +13,6 @@ use std::net::SocketAddr;
 pub struct CommandLineInterface {
     #[clap(subcommand)]
     pub command: Option<Commands>,
-    #[clap(long, short, default_value_t = SocketAddr::from(([0, 0, 0, 0], 8080)))]
-    pub addr: Option<SocketAddr>,
     #[arg(action = ArgAction::SetTrue, default_value_t = false, long, short)]
     pub debug: bool,
 }
@@ -32,5 +29,11 @@ impl CommandLineInterface {
 impl Default for CommandLineInterface {
     fn default() -> Self {
         Self::parse()
+    }
+}
+
+impl std::fmt::Display for CommandLineInterface {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap())
     }
 }

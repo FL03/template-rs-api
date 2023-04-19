@@ -39,6 +39,13 @@ impl Default for Context {
     }
 }
 
+impl std::fmt::Display for Context {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap())
+    }
+}
+
+
 impl From<Context> for OneshotChannels<Context> {
     fn from(_val: Context) -> Self {
         tokio::sync::oneshot::channel()
