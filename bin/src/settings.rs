@@ -77,7 +77,7 @@ impl Settings {
         builder = builder.add_source(
             Environment::default()
                 .separator("__")
-                .prefix(env!("CARGO_PKG_NAME").to_ascii_uppercase().as_str()),
+                .prefix(package_name().to_ascii_uppercase().as_str()),
         );
         // Try gathering valid configuration files...
         if let Ok(files) = try_collect_config_files("**/*.config.*", false) {
@@ -168,6 +168,12 @@ impl Server {
     }
     pub fn address(&self) -> std::net::SocketAddr {
         format!("{}:{}", self.host, self.port).parse().unwrap()
+    }
+    pub fn host(&self) -> std::net::IpAddr {
+        self.address().ip()
+    }
+    pub fn port(&self) -> u16 {
+        self.address().port()
     }
 }
 

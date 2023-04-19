@@ -21,8 +21,12 @@ impl Context {
             workdir: workdir.unwrap_or_else(crate::project_root),
         }
     }
+    
     pub fn name(&self) -> String {
         env!("CARGO_PKG_NAME").to_string()
+    }
+    pub fn version(&self) -> String {
+        env!("CARGO_PKG_VERSION").to_string()
     }
     pub fn settings(&self) -> &Settings {
         &self.cnf
