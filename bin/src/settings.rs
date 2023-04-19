@@ -3,14 +3,49 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use decanter::prelude::{Hash, Hashable};
-use scsys::prelude::config::{Config, Environment};
-use scsys::prelude::{
-    try_collect_config_files, ConfigResult, Configurable, Logger, SerdeDisplay, Server,
-};
+use config::{Config, Environment};
+use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, SerdeDisplay, Serialize)]
+/// Type alias for [config::File]
+type ConfigFile<Src, Fmt> = config::File<Src, Fmt>;
+/// Type alias for a collection of [crate::ConfigFile]
+type ConfigFileVec = Vec<ConfigFile<config::FileSourceFile, config::FileFormat>>;
+
+/// A generic function wrapper extending glob::glob
+pub fn collect_files_as<T>(f: &dyn Fn(PathBuf) -> T, pat: &str) -> anyhow::Result<Vec<T>> {
+    let mut files = Vec::<T>::new();
+    for r in glob::glob(pat)? {
+        files.push(f(r?))
+    }
+    Ok(files)
+}
+/// Gather configuration files following the specified pattern and collect them into a vector
+pub fn collect_config_files(pattern: &str, required: bool) -> ConfigFileVec {
+    let f = |p: std::path::PathBuf| ConfigFile::from(p).required(required);
+    collect_files_as(&f, pattern).expect("Failed to find any similar files...")
+}
+
+/// [package_name] is a simple functional wrapper for [env("CARGO_PKG_NAME")]
+pub fn package_name() -> String {
+    env!("CARGO_PKG_NAME").to_string()
+}
+/// Fetch the project root unless specified otherwise with a CARGO_MANIFEST_DIR env variable
+pub fn project_root() -> std::path::PathBuf {
+    std::path::Path::new(&env!("CARGO_MANIFEST_DIR"))
+        .ancestors()
+        .nth(1)
+        .unwrap()
+        .to_path_buf()
+}
+/// Attempts to collect configuration files, following the given pattern, into a ConfigFileVec
+pub fn try_collect_config_files(pattern: &str, required: bool) -> anyhow::Result<ConfigFileVec> {
+    let f = |p: std::path::PathBuf| ConfigFile::from(p).required(required);
+    collect_files_as(&f, pattern)
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Settings {
     pub logger: Logger,
     pub mode: String,
@@ -25,7 +60,7 @@ impl Settings {
             server: Server::new("0.0.0.0".to_string(), 8080),
         }
     }
-    pub fn build() -> ConfigResult<Self> {
+    pub fn build() -> Result<Self, config::ConfigError> {
         let mut builder = Config::builder()
             .set_default("mode", "production")?
             .set_default("logger.level", "info")?
@@ -59,18 +94,85 @@ impl Settings {
         &self.server
     }
 }
-
-impl Configurable for Settings {
-    type Settings = Self;
-
-    fn settings(&self) -> &Self::Settings {
-        self
-    }
-}
-
 impl Default for Settings {
     fn default() -> Self {
         let d = Self::new(None);
         Self::build().unwrap_or(d)
+    }
+}
+
+impl std::fmt::Display for Settings {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap())
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize)]
+pub struct Logger {
+    pub level: String,
+}
+
+impl Logger {
+    pub fn new() -> Self {
+        Self {
+            level: tracing::Level::INFO.to_string(),
+        }
+    }
+    pub fn set_level(mut self, level: impl ToString) {
+        self.level = level.to_string();
+    }
+    pub fn setup_env(mut self, level: Option<&str>) -> Self {
+        let key = level.unwrap_or("RUST_LOG");
+        if let Some(v) = std::env::var_os(key) {
+            self.level = v.into_string().expect("Failed to convert into string...");
+        } else {
+            std::env::set_var(key, self.level.clone());
+        }
+        self
+    }
+    pub fn init_tracing(self) {
+        tracing_subscriber::fmt::init();
+        tracing::debug!("Success: tracing layer initialized...");
+    }
+}
+
+impl Default for Logger {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl std::fmt::Display for Logger {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap())
+    }
+}
+
+impl From<tracing::Level> for Logger {
+    fn from(level: tracing::Level) -> Self {
+        Self {
+            level: level.to_string(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize)]
+pub struct Server {
+    pub host: String,
+    pub port: u16,
+}
+
+impl Server {
+    pub fn new(host: String, port: u16) -> Self {
+        Self { host, port }
+    }
+    pub fn address(&self) -> std::net::SocketAddr {
+        format!("{}:{}", self.host, self.port).parse().unwrap()
+    }
+}
+
+impl std::fmt::Display for Server {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap())
     }
 }

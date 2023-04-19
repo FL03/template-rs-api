@@ -3,26 +3,97 @@
    Contrib: FL03 <jo3mccain@icloud.com>
    Description: ... Summary ...
 */
-pub use self::interface::*;
+pub use self::server::*;
 
-pub(crate) mod interface;
+mod server;
 
 pub mod routes;
 
+use crate::Context;
+use axum::Router;
+use http::header::{HeaderName, AUTHORIZATION};
+use hyper::server::conn::AddrIncoming;
 use std::sync::Arc;
+use tower_http::{
+    compression::CompressionLayer,
+    propagate_header::PropagateHeaderLayer,
+    sensitive_headers::SetSensitiveHeadersLayer,
+    trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer},
+};
 
-pub fn new() -> Api {
-    Api::default()
+/// Simple function wrapper for [tokio::signal::ctrl_c]
+async fn shutdown() {
+    tokio::signal::ctrl_c()
+        .await
+        .expect("Expect shutdown signal handler");
+    tracing::info!("Signal received; initiating shutdown procedures...");
 }
 
-pub fn from_context(ctx: crate::Context) -> Api {
-    Api::from(ctx)
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct Api {
+    ctx: Arc<Context>,
 }
 
-pub async fn handle(ctx: Arc<crate::Context>) -> tokio::task::JoinHandle<Api> {
-    tokio::spawn(async move {
-        let api = Arc::new(from_context(ctx.as_ref().clone()));
-        api.start().await.expect("");
-        api.as_ref().clone()
-    })
+impl Api {
+    pub fn new(ctx: Arc<Context>) -> Self {
+        Self { ctx }
+    }
+    pub async fn client(&self) -> axum::Router {
+        Router::new()
+            .merge(routes::api())
+            .layer(
+                TraceLayer::new_for_http()
+                    .make_span_with(DefaultMakeSpan::new().include_headers(true))
+                    .on_request(DefaultOnRequest::new().level(tracing::Level::INFO))
+                    .on_response(DefaultOnResponse::new().level(tracing::Level::INFO)),
+            )
+            .layer(SetSensitiveHeadersLayer::new(std::iter::once(
+                AUTHORIZATION,
+            )))
+            .layer(CompressionLayer::new())
+            .layer(PropagateHeaderLayer::new(HeaderName::from_static(
+                "x-request-id",
+            )))
+            .layer(axum::Extension(self.ctx.clone()))
+    }
+    pub fn context(&self) -> Context {
+        self.ctx.as_ref().clone()
+    }
+    /// Fetch an instance of a [std::net::SocketAddr]
+    pub fn address(&self) -> std::net::SocketAddr {
+        self.context().cnf.server.address()
+    }
+    /// Creates a new builder instance with the address created from the given port
+    fn builder(&self) -> hyper::server::Builder<AddrIncoming> {
+        tracing::debug!("Initializing the server");
+        hyper::Server::bind(&self.address())
+    }
+    pub async fn serve(&self) -> anyhow::Result<()> {
+        tracing::info!("Starting the server...");
+        tracing::info!("Listening on {}", self.address());
+        self.builder()
+            .serve(self.client().await.into_make_service())
+            .with_graceful_shutdown(shutdown())
+            .await?;
+
+        Ok(())
+    }
+}
+
+impl From<Arc<Context>> for Api {
+    fn from(ctx: Arc<Context>) -> Self {
+        Self::new(ctx)
+    }
+}
+
+impl From<Context> for Api {
+    fn from(ctx: Context) -> Self {
+        Self::from(Arc::new(ctx))
+    }
+}
+
+impl std::fmt::Display for Api {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.ctx.settings().server().address())
+    }
 }

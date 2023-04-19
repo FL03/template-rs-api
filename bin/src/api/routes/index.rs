@@ -5,7 +5,7 @@
 */
 use crate::Context;
 use axum::{extract::Path, routing::get, Extension, Json, Router};
-use scsys::prelude::Message;
+
 use serde_json::{json, Value};
 
 pub fn router() -> Router {
@@ -18,13 +18,13 @@ pub fn router() -> Router {
 /// Define the landing endpoint
 pub async fn landing() -> Json<Value> {
     let name = env!("CARGO_PKG_NAME");
-    let msg = Message::from(format!("Welcome to {}", name));
+    let msg = format!("Welcome to {}", name);
     Json(json!(msg))
 }
 /// Implements a notification endpoint
 pub async fn notifications(Path(id): Path<usize>) -> Json<Value> {
     let data = json!({ "id": id });
-    Json(json!(Message::from(data)))
+    Json(data)
 }
 /// Broadcasts the current settings specified by the user for the interface and other technical systems to leverage
 pub async fn settings(Extension(ctx): Extension<Context>) -> Json<Value> {

@@ -3,10 +3,11 @@ name: Docker
 on:
   pull_request:
     branches: [ "main", "master", "prod*" ]
-    tags: [ "v*.*.*" ]
   push:
     branches: [ "main", "master", "prod*" ]
     tags: [ "v*.*.*" ]
+  release:
+    types: [published]
   schedule:
     - cron: "30 9 * * *"
   workflow_dispatch:

@@ -3,142 +3,112 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{channels::*, context::*, settings::*, states::*};
+pub use self::{context::*, events::*, primitives::*, settings::*, states::*};
 
-pub(crate) mod channels;
-pub(crate) mod context;
-pub(crate) mod settings;
-pub(crate) mod states;
+mod context;
+mod events;
+mod primitives;
+mod settings;
+mod states;
 
 pub mod api;
 pub mod cli;
-pub mod runtime;
 
-use acme::prelude::{AppSpec, AsyncSpawnable};
-use scsys::prelude::{AsyncResult, Locked};
-use std::{convert::From, sync::Arc};
+use cli::{opts::Opts, CommandLineInterface};
+use std::sync::{Arc, Mutex};
+use tokio::sync::mpsc;
 
 #[tokio::main]
-async fn main() -> AsyncResult {
+async fn main() -> anyhow::Result<()> {
     // Create an application instance
-    let mut app = Application::default();
-    // Quickstart the application runtime with the following command
-    app.setup()?;
-    app.spawn().await?;
+    let _app = Application::default().init().spawn().await??;
 
     Ok(())
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Application {
     pub ctx: Arc<Context>,
-    pub rt: Arc<runtime::Runtime>,
+    event: mpsc::Receiver<AppEvent>,
     pub state: Locked<State>,
 }
 
 impl Application {
-    pub fn new(ctx: Arc<Context>) -> Self {
-        let state = States::default();
-
+    pub fn new(ctx: Arc<Context>, event: mpsc::Receiver<AppEvent>) -> Self {
         Self {
             ctx: ctx.clone(),
-            rt: Arc::new(runtime::Runtime::from(ctx)),
-            state: state.into(),
+            event,
+            state: Arc::new(Mutex::new(State::default())),
         }
     }
-    /// Application runtime
-    pub fn runtime(&self) -> &runtime::Runtime {
-        self.rt.as_ref()
+    pub fn api(&self) -> api::Api {
+        api::Api::new(self.ctx.clone())
     }
-}
+    /// Handle events from the event loop
+    pub async fn handle_event(&mut self, event: AppEvent) -> anyhow::Result<()> {
+        match event {
+            AppEvent::Shutdown => {
+                tracing::info!("Message Recieved: Shutting down...");
+                self.state.lock().unwrap().set(State::Terminated);
+            }
+            AppEvent::Startup => {
+                tracing::info!("Message Recieved: System initializing...");
+                self.state.lock().unwrap().set(State::Startup);
+            }
+        }
 
-#[async_trait::async_trait]
-impl AsyncSpawnable for Application {
-    async fn spawn(&mut self) -> AsyncResult<&Self> {
-        let ctx_chan = tokio::sync::watch::channel(self.ctx.clone());
-        ctx_chan
-            .0
-            .send(self.ctx.clone())
-            .expect("Context channel droppped...");
-
-        let state_chan = tokio::sync::watch::channel(self.state.clone());
-        state_chan
-            .0
-            .send(self.state.clone())
-            .expect("State channel droppped...");
-
-        tracing::debug!("Spawning the application and related services...");
-        self.state = States::Process.into();
-        state_chan
-            .0
-            .send(self.state.clone())
-            .expect("State channel droppped...");
-        // Fetch the initialized cli and process the results
-        self.runtime().handler().await?;
-        // Signal process completion with a change of state
-        self.state = States::Complete.into();
-        state_chan
-            .0
-            .send(self.state.clone())
-            .expect("State channel droppped...");
-        // Resume default application behaviour
-        self.state = States::Idle.into();
-        state_chan
-            .0
-            .send(self.state.clone())
-            .expect("State channel droppped...");
-        Ok(self)
+        Ok(())
     }
-}
-
-impl AppSpec<Settings> for Application {
-    type Ctx = Context;
-
-    type State = State;
-
-    fn init() -> Self {
-        Self::default()
+    /// Initialize the application
+    pub fn init(self) -> Self {
+        let logger = self.ctx.settings().logger.clone();
+        logger.setup_env(None).init_tracing();
+        self
     }
+    /// Process arguments from the command line interface
+    pub async fn process(&mut self, cli: CommandLineInterface) -> anyhow::Result<()> {
+        if let Some(cmd) = cli.command() {
+            match cmd {
+                Opts::System(sys) => {
+                    if sys.up {
+                        tracing::info!("Message Recieved: Booting up the server...");
+                        if sys.detached {
+                            tracing::info!("Message Recieved: Spawning server in detached mode...");
+                        } else {
+                            self.api().serve().await?;
+                        }
+                    }
+                }
+            }
+        }
 
-    fn context(&self) -> Self::Ctx {
-        self.ctx.as_ref().clone()
+        Ok(())
     }
-
-    fn name(&self) -> String {
-        env!("CARGO_PKG_NAME").to_string()
+    /// Run the application
+    pub async fn run(mut self) -> anyhow::Result<()> {
+        let cli = CommandLineInterface::new();
+        self.process(cli).await.expect("");
+        Ok(loop {
+            tokio::select! {
+                Some(event) = self.event.recv() => {
+                    tracing::info!("Event Recieved: {:?}", event);
+                }
+                _ = tokio::signal::ctrl_c() => {
+                    tracing::info!("Message Recieved: Shutting down...");
+                    break;
+                }
+            }
+        })
     }
-
-    fn settings(&self) -> Settings {
-        self.ctx.settings().clone()
-    }
-
-    fn setup(&mut self) -> AsyncResult<&Self> {
-        self.settings().logger().clone().setup(None);
-        tracing_subscriber::fmt::init();
-        tracing::debug!("Application initialized; completing setup...");
-        Ok(self)
-    }
-
-    fn state(&self) -> &Locked<State> {
-        &self.state
+    /// Spawn the application
+    pub fn spawn(self) -> tokio::task::JoinHandle<anyhow::Result<()>> {
+        tokio::spawn(self.run())
     }
 }
 
 impl Default for Application {
     fn default() -> Self {
-        Self::from(Context::default())
-    }
-}
-
-impl From<Settings> for Application {
-    fn from(data: Settings) -> Self {
-        Self::from(Context::from(data))
-    }
-}
-
-impl From<Context> for Application {
-    fn from(data: Context) -> Self {
-        Self::new(Arc::new(data))
+        Self::new(Arc::new(Context::default()), mpsc::channel(1).1)
     }
 }
 

@@ -3,13 +3,12 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::{OneshotChannels, Settings, UnboundedMPSC};
-use decanter::prelude::{Hash, Hashable};
-use scsys::prelude::{Contextual, SerdeDisplay};
+use crate::Settings;
+use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
-use std::{convert::From, path::PathBuf};
+use std::path::PathBuf;
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, SerdeDisplay, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Context {
     pub cnf: Settings,
     pub workdir: PathBuf,
@@ -19,8 +18,11 @@ impl Context {
     pub fn new(cnf: Option<Settings>, workdir: Option<PathBuf>) -> Self {
         Self {
             cnf: cnf.unwrap_or_default(),
-            workdir: workdir.unwrap_or_else(scsys::project_root),
+            workdir: workdir.unwrap_or_else(crate::project_root),
         }
+    }
+    pub fn name(&self) -> String {
+        env!("CARGO_PKG_NAME").to_string()
     }
     pub fn settings(&self) -> &Settings {
         &self.cnf
@@ -40,31 +42,9 @@ impl Default for Context {
     }
 }
 
-impl Contextual for Context {
-    type Cnf = Settings;
-
-    type Ctx = Self;
-
-    fn context(&self) -> &Self::Ctx {
-        self
-    }
-}
-
-impl From<Context> for OneshotChannels<Context> {
-    fn from(_val: Context) -> Self {
-        tokio::sync::oneshot::channel()
-    }
-}
-
-impl From<Context> for UnboundedMPSC<Context> {
-    fn from(_val: Context) -> Self {
-        tokio::sync::mpsc::unbounded_channel()
-    }
-}
-
-impl From<Settings> for Context {
-    fn from(data: Settings) -> Self {
-        Self::new(Some(data), None)
+impl std::fmt::Display for Context {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", serde_json::to_string(&self).unwrap())
     }
 }
 
