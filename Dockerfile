@@ -40,4 +40,3 @@ EXPOSE ${SERVER_PORT}
 EXPOSE 6379
 
 ENTRYPOINT [ "template-rs-api" ]
-CMD [ "system", "--up" ]
