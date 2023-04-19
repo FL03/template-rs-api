@@ -6,13 +6,16 @@
 use crate::cli::cmd::Commands;
 use clap::{ArgAction, Parser};
 use serde::{Deserialize, Serialize};
+use std::net::SocketAddr;
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, Parser, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, Parser, PartialEq, PartialOrd, Serialize)]
 #[clap(about, author, long_about = None, version)]
 #[command(arg_required_else_help(true), allow_missing_positional(true))]
 pub struct CommandLineInterface {
     #[clap(subcommand)]
     pub command: Option<Commands>,
+    #[clap(long, short, default_value_t = SocketAddr::from(([0, 0, 0, 0], 8080)))]
+    pub addr: Option<SocketAddr>,
     #[arg(action = ArgAction::SetTrue, default_value_t = false, long, short)]
     pub debug: bool,
 }

@@ -5,7 +5,7 @@
 */
 pub use self::interface::*;
 
-pub(crate) mod interface;
+mod interface;
 
 pub mod routes;
 

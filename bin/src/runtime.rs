@@ -5,14 +5,12 @@
 */
 use crate::cli::{cmd::Commands, CommandLineInterface};
 use crate::{api::Api, Context};
-use acme::prelude::{AsyncSpawnable, Session};
 use clap::Parser;
-use scsys::prelude::AsyncResult;
 use std::sync::Arc;
 use tokio::sync::watch;
 use tokio::task::JoinHandle;
 
-pub async fn handle_cli(mut api: Api, cli: CommandLineInterface) -> AsyncResult {
+pub async fn handle_cli(mut api: Api, cli: CommandLineInterface) -> anyhow::Result<()> {
     if let Some(cmd) = cli.command() {
         match cmd {
             Commands::System(sys) => {
@@ -32,19 +30,17 @@ pub struct Runtime {
     pub api: Arc<Api>,
     pub ctx: watch::Receiver<Arc<Context>>,
     pub cli: Arc<CommandLineInterface>,
-    pub session: Session,
 }
 
 impl Runtime {
-    pub fn new(ctx: Arc<Context>, session: Session) -> Self {
+    pub fn new(ctx: Arc<Context>) -> Self {
         Self {
             api: Api::from(ctx.as_ref().clone()).into(),
             cli: CommandLineInterface::parse().into(),
             ctx: watch::channel(ctx.clone()).1,
-            session,
         }
     }
-    pub async fn handle(&self) -> JoinHandle<AsyncResult> {
+    pub async fn handle(&self) -> JoinHandle<anyhow::Result<&Self>> {
         let rt = Arc::new(self.clone());
 
         tokio::spawn(async move {
@@ -61,7 +57,7 @@ impl Runtime {
             }
         })
     }
-    pub async fn handler(&self) -> AsyncResult<&Self> {
+    pub async fn handler(&self) -> anyhow::Result<&Self> {
         handle_cli(self.api.as_ref().clone(), self.cli.as_ref().clone()).await?;
 
         Ok(self)
@@ -76,7 +72,7 @@ impl Default for Runtime {
 
 impl From<Arc<Context>> for Runtime {
     fn from(ctx: Arc<Context>) -> Self {
-        Self::new(ctx, Default::default())
+        Self::new(ctx)
     }
 }
 

@@ -4,12 +4,11 @@
     Description: ... summary ...
 */
 use crate::{OneshotChannels, Settings, UnboundedMPSC};
-use decanter::prelude::{Hash, Hashable};
-use scsys::prelude::{Contextual, SerdeDisplay};
+use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 use std::{convert::From, path::PathBuf};
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, SerdeDisplay, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Context {
     pub cnf: Settings,
     pub workdir: PathBuf,
@@ -19,7 +18,7 @@ impl Context {
     pub fn new(cnf: Option<Settings>, workdir: Option<PathBuf>) -> Self {
         Self {
             cnf: cnf.unwrap_or_default(),
-            workdir: workdir.unwrap_or_else(scsys::project_root),
+            workdir: workdir.unwrap_or_else(crate::project_root),
         }
     }
     pub fn settings(&self) -> &Settings {
@@ -37,16 +36,6 @@ impl Context {
 impl Default for Context {
     fn default() -> Self {
         Self::new(None, None)
-    }
-}
-
-impl Contextual for Context {
-    type Cnf = Settings;
-
-    type Ctx = Self;
-
-    fn context(&self) -> &Self::Ctx {
-        self
     }
 }
 

@@ -5,21 +5,20 @@
 */
 pub use self::{context::*, primitives::*, settings::*, states::*};
 
-pub(crate) mod context;
-pub(crate) mod primitives;
-pub(crate) mod settings;
-pub(crate) mod states;
+mod context;
+mod primitives;
+mod settings;
+mod states;
 
 pub mod api;
 pub mod cli;
 pub mod runtime;
 
-use acme::prelude::{AppSpec, AsyncSpawnable};
-use scsys::prelude::{AsyncResult, Locked};
+
 use std::{convert::From, sync::Arc};
 
 #[tokio::main]
-async fn main() -> AsyncResult {
+async fn main() -> anyhow::Result<()> {
     // Create an application instance
     let mut app = Application::default();
     // Quickstart the application runtime with the following command
@@ -38,7 +37,7 @@ pub struct Application {
 
 impl Application {
     pub fn new(ctx: Arc<Context>) -> Self {
-        let state = States::default();
+        let state = State::default();
 
         Self {
             ctx: ctx.clone(),
@@ -50,11 +49,7 @@ impl Application {
     pub fn runtime(&self) -> &runtime::Runtime {
         self.rt.as_ref()
     }
-}
-
-#[async_trait::async_trait]
-impl AsyncSpawnable for Application {
-    async fn spawn(&mut self) -> AsyncResult<&Self> {
+    pub async fn spawn(&mut self) -> anyhow::Result<&Self> {
         let ctx_chan = tokio::sync::watch::channel(self.ctx.clone());
         ctx_chan
             .0
@@ -68,7 +63,7 @@ impl AsyncSpawnable for Application {
             .expect("State channel droppped...");
 
         tracing::debug!("Spawning the application and related services...");
-        self.state = States::Process.into();
+        self.state = State::Process.into();
         state_chan
             .0
             .send(self.state.clone())
@@ -76,50 +71,44 @@ impl AsyncSpawnable for Application {
         // Fetch the initialized cli and process the results
         self.runtime().handler().await?;
         // Signal process completion with a change of state
-        self.state = States::Complete.into();
+        self.state = State::Complete.into();
         state_chan
             .0
             .send(self.state.clone())
             .expect("State channel droppped...");
         // Resume default application behaviour
-        self.state = States::Idle.into();
+        self.state = State::Idle.into();
         state_chan
             .0
             .send(self.state.clone())
             .expect("State channel droppped...");
         Ok(self)
     }
-}
 
-impl AppSpec<Settings> for Application {
-    type Ctx = Context;
-
-    type State = State;
-
-    fn init() -> Self {
-        Self::default()
+    pub fn init(self) -> Self {
+        self
     }
 
-    fn context(&self) -> Self::Ctx {
-        self.ctx.as_ref().clone()
+    pub fn context(&self) -> Context {
+        self.ctx.clone()
     }
 
-    fn name(&self) -> String {
+    pub fn name(&self) -> String {
         env!("CARGO_PKG_NAME").to_string()
     }
 
-    fn settings(&self) -> Settings {
+    pub fn settings(&self) -> Settings {
         self.ctx.settings().clone()
     }
 
-    fn setup(&mut self) -> AsyncResult<&Self> {
+    pub fn setup(&mut self) -> anyhow::Result<&Self> {
         self.settings().logger().clone().setup(None);
         tracing_subscriber::fmt::init();
         tracing::debug!("Application initialized; completing setup...");
         Ok(self)
     }
 
-    fn state(&self) -> &Locked<State> {
+    pub fn state(&self) -> &Locked<State> {
         &self.state
     }
 }

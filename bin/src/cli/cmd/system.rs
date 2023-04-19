@@ -4,7 +4,6 @@
    Description: ... Summary ...
 */
 use clap::{ArgAction, Args};
-use scsys::AsyncResult;
 use serde::{Deserialize, Serialize};
 
 #[derive(Args, Clone, Debug, Default, Deserialize, Eq, Hash, PartialEq, Serialize)]
@@ -16,7 +15,7 @@ pub struct System {
 }
 
 impl System {
-    pub async fn handle(&self) -> AsyncResult<&Self> {
+    pub async fn handle(&self) -> anyhow::Result<&Self> {
         Ok(self)
     }
 }

@@ -6,7 +6,7 @@
 pub use self::interface::*;
 
 pub mod cmd;
-pub(crate) mod interface;
+mod interface;
 
 pub fn cli() -> CommandLineInterface {
     CommandLineInterface::default()
