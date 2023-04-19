@@ -1,20 +1,20 @@
 [package]
 authors.workspace = true
 categories = []
-default-run = "template-api-rs"
+default-run = "template-rs-api"
 description.workspace = true
 edition.workspace = true
 homepage.workspace = true
 keywords = ["app", "binary", "clap", "cli", "template"]
 license.workspace = true
-name = "template-api-rs"
+name = "template-rs-api"
 readme.workspace = true
 repository.workspace = true
 version.workspace = true
 
 [[bin]]
 bench = true
-name = "template-api-rs"
+name = "template-rs-api"
 path = "src/main.rs"
 test = true
 

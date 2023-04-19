@@ -3,56 +3,95 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-pub use self::{context::*, primitives::*, settings::*, states::*};
+pub use self::{context::*, events::*, primitives::*, settings::*, states::*};
 
 mod context;
+mod events;
 mod primitives;
 mod settings;
 mod states;
 
 pub mod api;
 pub mod cli;
-pub mod runtime;
 
-
+use cli::{opts::Opts, CommandLineInterface};
 use std::sync::{Arc, Mutex};
+use tokio::sync::mpsc;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let api = api::new();
-    api.serve().await?;
     // Create an application instance
-    // let mut app = Application::default().setup();
-    // app.spawn().await?;
+    let _app = Application::default().init().spawn().await??;
 
     Ok(())
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Application {
     pub ctx: Arc<Context>,
-    pub rt: Arc<runtime::Runtime>,
+    event: mpsc::Receiver<AppEvent>,
     pub state: Locked<State>,
 }
 
 impl Application {
-    pub fn new(ctx: Arc<Context>) -> Self {
+    pub fn new(ctx: Arc<Context>, event: mpsc::Receiver<AppEvent>) -> Self {
         Self {
             ctx: ctx.clone(),
-            rt: Arc::new(runtime::Runtime::from(ctx)),
+            event,
             state: Arc::new(Mutex::new(State::default())),
         }
     }
-    /// Application runtime
-    pub fn runtime(&self) -> &runtime::Runtime {
-        self.rt.as_ref()
+    pub fn api(&self) -> api::Api {
+        api::Api::new(self.ctx.clone())
     }
-    pub async fn spawn(&mut self) -> anyhow::Result<()> {
+    /// Handle events from the event loop
+    pub async fn handle_event(&mut self, event: AppEvent) -> anyhow::Result<()> {
+        match event {
+            AppEvent::Shutdown => {
+                tracing::info!("Message Recieved: Shutting down...");
+                self.state.lock().unwrap().set(State::Terminated);
+            }
+            AppEvent::Startup => {
+                tracing::info!("Message Recieved: System initializing...");
+                self.state.lock().unwrap().set(State::Startup);
+            }
+        }
+
+        Ok(())
+    }
+    /// Initialize the application
+    pub fn init(self) -> Self {
+        let logger = self.ctx.settings().logger.clone();
+        logger.setup_env(None).init_tracing();
+        self
+    }
+    /// Process arguments from the command line interface
+    pub async fn process(&mut self, cli: CommandLineInterface) -> anyhow::Result<()> {
+        if let Some(cmd) = cli.command() {
+            match cmd {
+                Opts::System(sys) => {
+                    if sys.up {
+                        tracing::info!("Message Recieved: Booting up the server...");
+                        if sys.detached {
+                            tracing::info!("Message Recieved: Spawning server in detached mode...");
+                        } else {
+                            self.api().serve().await?;
+                        }
+                    }
+                }
+            }
+        }
+
+        Ok(())
+    }
+    /// Run the application
+    pub async fn run(mut self) -> anyhow::Result<()> {
+        let cli = CommandLineInterface::new();
+        self.process(cli).await.expect("");
         Ok(loop {
             tokio::select! {
-                _ = self.runtime().handle() => {
-                    tracing::info!("Message Recieved: Shutting down...");
-                    break;
+                Some(event) = self.event.recv() => {
+                    tracing::info!("Event Recieved: {:?}", event);
                 }
                 _ = tokio::signal::ctrl_c() => {
                     tracing::info!("Message Recieved: Shutting down...");
@@ -61,45 +100,15 @@ impl Application {
             }
         })
     }
-
-    pub fn init(self) -> Self {
-        self
-    }
-
-    pub fn name(&self) -> String {
-        env!("CARGO_PKG_NAME").to_string()
-    }
-
-    pub fn settings(&self) -> Settings {
-        self.ctx.settings().clone()
-    }
-    pub fn setup(self) -> Self {
-        // Initialize tracing layer...
-        let logger = self.ctx.settings().logger.clone();
-        logger.setup_env(None).init_tracing();
-        self
-    }
-
-    pub fn state(&self) -> &Locked<State> {
-        &self.state
+    /// Spawn the application
+    pub fn spawn(self) -> tokio::task::JoinHandle<anyhow::Result<()>> {
+        tokio::spawn(self.run())
     }
 }
 
 impl Default for Application {
     fn default() -> Self {
-        Self::from(Context::default())
-    }
-}
-
-impl From<Settings> for Application {
-    fn from(data: Settings) -> Self {
-        Self::from(Context::from(data))
-    }
-}
-
-impl From<Context> for Application {
-    fn from(data: Context) -> Self {
-        Self::new(Arc::new(data))
+        Self::new(Arc::new(Context::default()), mpsc::channel(1).1)
     }
 }
 

@@ -6,10 +6,14 @@
 use clap::{ArgAction, Args};
 use serde::{Deserialize, Serialize};
 
-#[derive(Args, Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Args, Clone, Debug, Default, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize,
+)]
 pub struct System {
     #[clap(long, short)]
     pub config: Option<std::path::PathBuf>,
+    #[arg(action = ArgAction::SetTrue, long, short)]
+    pub detached: bool,
     #[arg(action = ArgAction::SetTrue, long, short = 'U')]
     pub up: bool,
 }

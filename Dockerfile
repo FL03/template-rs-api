@@ -31,7 +31,7 @@ ENV RUST_LOG="info" \
 COPY --chown=55 .config /config
 VOLUME ["/config"]
 
-COPY --from=builder /app/target/release/conduit /bin/conduit
+COPY --from=builder /app/target/release/template-rs-api /bin/template-rs-api
 
 FROM runner
 
@@ -39,5 +39,5 @@ EXPOSE 80
 EXPOSE ${SERVER_PORT}
 EXPOSE 6379
 
-ENTRYPOINT [ "conduit" ]
-CMD [ "--up" ]
+ENTRYPOINT [ "template-rs-api" ]
+CMD [ "system", "--up" ]

@@ -5,36 +5,51 @@
 */
 use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
+use smart_default::SmartDefault;
 use strum::{Display, EnumString, EnumVariantNames};
 
 #[derive(
-    Clone, Debug, Deserialize, Display, EnumString, EnumVariantNames, Eq, Hash, Hashable, PartialEq, Serialize,
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Display,
+    EnumString,
+    EnumVariantNames,
+    Eq,
+    Hash,
+    Hashable,
+    PartialEq,
+    Serialize,
+    SmartDefault,
 )]
+#[repr(u8)]
 #[strum(serialize_all = "snake_case")]
 pub enum State {
-    Error = 0,
-    Idle = 1,
-    Complete = 2,
-    Derive = 3,
-    Process = 4,
-    Request = 5,
-    Response = 6,
+    Error,
+    #[default]
+    Idle,
+    Invalid,
+    Running,
+    Startup,
+    Terminated,
 }
 
 impl State {
+    pub fn default_state(mut self, val: State) -> Self {
+        self = val;
+        self
+    }
     pub fn idle() -> Self {
         Self::Idle
     }
-}
-
-impl Default for State {
-    fn default() -> Self {
-        Self::idle()
+    pub fn set(&mut self, val: Self) {
+        *self = val;
     }
 }
 
-impl From<State> for i64 {
-    fn from(val: State) -> Self {
-        val as i64
+impl From<State> for u8 {
+    fn from(val: State) -> u8 {
+        val as u8
     }
 }

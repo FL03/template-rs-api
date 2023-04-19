@@ -45,7 +45,6 @@ pub fn try_collect_config_files(pattern: &str, required: bool) -> anyhow::Result
     collect_files_as(&f, pattern)
 }
 
-
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Settings {
     pub logger: Logger,
@@ -108,7 +107,6 @@ impl std::fmt::Display for Settings {
     }
 }
 
-
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Logger {
     pub level: String,
@@ -161,15 +159,12 @@ impl From<tracing::Level> for Logger {
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Hashable, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct Server {
     pub host: String,
-    pub port: u16
+    pub port: u16,
 }
 
 impl Server {
     pub fn new(host: String, port: u16) -> Self {
-        Self {
-            host,
-            port
-        }
+        Self { host, port }
     }
     pub fn address(&self) -> std::net::SocketAddr {
         format!("{}:{}", self.host, self.port).parse().unwrap()

@@ -11,12 +11,14 @@ use clap::Subcommand;
 use serde::{Deserialize, Serialize};
 use strum::Display;
 
-#[derive(Clone, Debug, Deserialize, Display, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Subcommand)]
-pub enum Commands {
+#[derive(
+    Clone, Debug, Deserialize, Display, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize, Subcommand,
+)]
+pub enum Opts {
     System(System),
 }
 
-impl Default for Commands {
+impl Default for Opts {
     fn default() -> Self {
         Self::System(Default::default())
     }
