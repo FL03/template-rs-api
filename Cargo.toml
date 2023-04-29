@@ -1,7 +1,7 @@
 [package]
 authors = ["FL03 <jo3mccain@icloud.com> (https://github.com/FL03)"]
 categories = []
-default-run = "api"
+default-run = "template-rs-api"
 description = "template-api-rs is a complete template for creating high-preformance RESTful API's in Rust"
 edition = "2021"
 keywords = []
@@ -15,7 +15,7 @@ version = "0.0.2"
 [[bin]]
 bench = true
 doctest = false
-name = "api"
+name = "template-rs-api"
 path = "src/main.rs"
 test = true
 
