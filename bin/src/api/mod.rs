@@ -13,6 +13,7 @@ use crate::Context;
 use axum::Router;
 use http::header::{HeaderName, AUTHORIZATION};
 use hyper::server::conn::AddrIncoming;
+use std::net::SocketAddr;
 use std::sync::Arc;
 use tower_http::{
     compression::CompressionLayer,
@@ -29,16 +30,25 @@ async fn shutdown() {
     tracing::info!("Signal received; initiating shutdown procedures...");
 }
 
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Api {
+    addr: SocketAddr,
     ctx: Arc<Context>,
 }
 
 impl Api {
     pub fn new(ctx: Arc<Context>) -> Self {
-        Self { ctx }
+        Self { addr: ctx.clone().address(), ctx }
     }
-    pub async fn client(&self) -> axum::Router {
+    pub fn address(&self) -> &SocketAddr {
+        &self.addr
+    }
+    /// Creates a new builder instance with the address created from the given port
+    fn builder(&self) -> hyper::server::Builder<AddrIncoming> {
+        tracing::debug!("Initializing the server");
+        hyper::Server::bind(self.address())
+    }
+    pub async fn client(self) -> axum::Router {
         Router::new()
             .merge(routes::api())
             .layer(
@@ -54,21 +64,12 @@ impl Api {
             .layer(PropagateHeaderLayer::new(HeaderName::from_static(
                 "x-request-id",
             )))
-            .layer(axum::Extension(self.ctx.clone()))
+            .layer(axum::Extension(self.ctx))
     }
     pub fn context(&self) -> Context {
         self.ctx.as_ref().clone()
     }
-    /// Fetch an instance of a [std::net::SocketAddr]
-    pub fn address(&self) -> std::net::SocketAddr {
-        self.context().cnf.server.address()
-    }
-    /// Creates a new builder instance with the address created from the given port
-    fn builder(&self) -> hyper::server::Builder<AddrIncoming> {
-        tracing::debug!("Initializing the server");
-        hyper::Server::bind(&self.address())
-    }
-    pub async fn serve(&self) -> anyhow::Result<()> {
+    pub async fn serve(self) -> anyhow::Result<()> {
         tracing::info!("Starting the server...");
         tracing::info!("Listening on {}", self.address());
         self.builder()
@@ -78,17 +79,16 @@ impl Api {
 
         Ok(())
     }
-}
-
-impl From<Arc<Context>> for Api {
-    fn from(ctx: Arc<Context>) -> Self {
-        Self::new(ctx)
+    pub fn with_tracing(self) -> Self {
+        let logger = self.ctx.cnf.logger.clone();
+        logger.setup_env(None).init_tracing();
+        self
     }
 }
 
-impl From<Context> for Api {
-    fn from(ctx: Context) -> Self {
-        Self::from(Arc::new(ctx))
+impl Default for Api {
+    fn default() -> Self {
+        Self::new(Arc::new(Context::default()))
     }
 }
 

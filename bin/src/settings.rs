@@ -57,7 +57,7 @@ impl Settings {
         Self {
             logger: Default::default(),
             mode: mode.unwrap_or_else(|| String::from("production")),
-            server: Server::new("0.0.0.0".to_string(), 8080),
+            server: Default::default(),
         }
     }
     pub fn build() -> Result<Self, config::ConfigError> {
@@ -174,6 +174,12 @@ impl Server {
     }
     pub fn port(&self) -> u16 {
         self.address().port()
+    }
+}
+
+impl Default for Server {
+    fn default() -> Self {
+        Self::new("0.0.0.0".to_string(), 8080)
     }
 }
 

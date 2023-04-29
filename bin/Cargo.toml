@@ -23,7 +23,6 @@ test = true
 [dependencies]
 # Custom crates
 decanter = { features = ["derive"], version = "0.1.5" }
-# scsys = { features = ["full"], version = "0.1.42" }
 
 # Standard dependencies
 anyhow = "1"
