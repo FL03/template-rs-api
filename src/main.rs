@@ -12,18 +12,16 @@ mod settings;
 mod states;
 
 pub mod api;
-pub mod cli;
 
-use cli::{opts::Opts, CommandLineInterface};
 use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let _ = api::Api::default().with_tracing().serve().await?;
-    // Create an application instance
-    // let _app = Application::default().init().spawn().await??;
-
+    {
+        let app = Application::default().init();
+        app.spawn(tokio::runtime::Handle::current()).await??;
+    }
     Ok(())
 }
 
@@ -48,14 +46,17 @@ impl Application {
     /// Handle events from the event loop
     pub async fn handle_event(&mut self, event: AppEvent) -> anyhow::Result<()> {
         match event {
-            AppEvent::Shutdown => {
-                tracing::info!("Message Recieved: Shutting down...");
-                self.state.lock().unwrap().set(State::Terminated);
-            }
-            AppEvent::Startup => {
-                tracing::info!("Message Recieved: System initializing...");
-                self.state.lock().unwrap().set(State::Startup);
-            }
+            AppEvent::Power(power) => match power {
+                PowerEvent::Shutdown => {
+                    tokio::signal::ctrl_c().await?;
+                    tracing::info!("Message Recieved: Shutting down...");
+                    self.state.lock().unwrap().set(State::Terminated);
+                }
+                PowerEvent::Startup => {
+                    tracing::info!("Message Recieved: System initializing...");
+                    self.state.lock().unwrap().set(State::Startup);
+                }
+            },
         }
 
         Ok(())
@@ -66,29 +67,12 @@ impl Application {
         logger.setup_env(None).init_tracing();
         self
     }
-    /// Process arguments from the command line interface
-    pub async fn process(&mut self, cli: CommandLineInterface) -> anyhow::Result<()> {
-        if let Some(cmd) = cli.command() {
-            match cmd {
-                Opts::System(sys) => {
-                    if sys.up {
-                        tracing::info!("Message Recieved: Booting up the server...");
-                        if sys.detached {
-                            tracing::info!("Message Recieved: Spawning server in detached mode...");
-                        } else {
-                            self.api().serve().await?;
-                        }
-                    }
-                }
-            }
-        }
-
+    /// Process commands
+    pub async fn handle_command(&mut self, _cmd: impl ToString) -> anyhow::Result<()> {
         Ok(())
     }
     /// Run the application
     pub async fn run(mut self) -> anyhow::Result<()> {
-        let cli = CommandLineInterface::new();
-        self.process(cli).await.expect("");
         Ok(loop {
             tokio::select! {
                 Some(event) = self.event.recv() => {
@@ -102,8 +86,16 @@ impl Application {
         })
     }
     /// Spawn the application
-    pub fn spawn(self) -> tokio::task::JoinHandle<anyhow::Result<()>> {
-        tokio::spawn(self.run())
+    pub fn spawn(
+        self,
+        handle: tokio::runtime::Handle,
+    ) -> tokio::task::JoinHandle<anyhow::Result<()>> {
+        let api = api::Api::new(self.ctx.clone());
+
+        handle.spawn(async move {
+            api.serve().await?;
+            self.run().await
+        })
     }
 }
 

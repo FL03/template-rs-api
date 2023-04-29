@@ -38,7 +38,10 @@ pub struct Api {
 
 impl Api {
     pub fn new(ctx: Arc<Context>) -> Self {
-        Self { addr: ctx.clone().address(), ctx }
+        Self {
+            addr: ctx.clone().address(),
+            ctx,
+        }
     }
     pub fn address(&self) -> &SocketAddr {
         &self.addr

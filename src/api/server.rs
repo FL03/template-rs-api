@@ -24,7 +24,23 @@ where
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, Display, EnumIter, EnumString, EnumVariantNames, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    Deserialize,
+    Display,
+    EnumIter,
+    EnumString,
+    EnumVariantNames,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+)]
 #[repr(u8)]
 #[serde(rename_all = "snake_case")]
 pub enum ServerType {
@@ -35,10 +51,7 @@ pub enum ServerType {
 
 pub enum ServerAddress {
     Address(SocketAddr),
-    Pieces {
-        host: IpAddr,
-        port: u16,
-    },
+    Pieces { host: IpAddr, port: u16 },
 }
 
 impl ServerAddress {
@@ -75,8 +88,6 @@ impl From<SocketAddr> for ServerAddress {
         Self::Address(addr)
     }
 }
-
-
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub struct ServerConfig {

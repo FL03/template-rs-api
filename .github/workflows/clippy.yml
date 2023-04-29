@@ -7,6 +7,8 @@ on:
     branches-ignore: [ "beta*", "dev*", "next*" ]
     tags: [ "nightly*",  "v*.*.*" ]
   release:
+  repository_dispatch:
+    types: [ clippy ]
   schedule:
     - cron: "30 9 * * *" # 9:30am UTC
   workflow_dispatch:

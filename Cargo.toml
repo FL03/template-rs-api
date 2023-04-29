@@ -1,26 +1,53 @@
-[workspace.package]
-authors = ["FL03 <jo3mccain@icloud.com> (https://gitlab.com/FL03)"]
+[package]
+authors = ["FL03 <jo3mccain@icloud.com> (https://github.com/FL03)"]
 categories = []
+default-run = "api"
 description = "template-api-rs is a complete template for creating high-preformance RESTful API's in Rust"
 edition = "2021"
 keywords = []
-homepage = "https://gitlab.com/pzzld/templates/template-api-rs/wiki"
+homepage = "https://github.com/FL03/template-api-rs/wiki"
 license = "Apache-2.0"
+name = "template-rs-api"
 readme = "README.md"
-repository = "https://gitlab.com/pzzld/templates/template-api-rs"
+repository = "https://github.com/FL03/template-api-rs"
 version = "0.0.2"
 
-[workspace]
-default-members = [
-    "bin"
-]
-exclude = [
-    "examples/wasm",
-    "xtask"
-]
-members = [
-    "bin",
-]
+[[bin]]
+bench = true
+doctest = false
+name = "api"
+path = "src/main.rs"
+test = true
+
+[build-dependencies]
+
+[dependencies]
+# Custom crates
+decanter = { features = ["derive"], version = "0.1.5" }
+
+# Standard dependencies
+anyhow = "1"
+async-trait = "0.1"
+axum = { features = ["headers", "http2", "macros"], version = "0.6" }
+axum-core = "0.3"
+chrono = "0.4"
+config = "0.13"
+futures = "0.3.25"
+glob = "0.3"
+http = "0.2.8"
+hyper = { features = [], version = "0.14" }
+serde = { features = ["derive"], version = "1" }
+serde_json = "1"
+smart-default = "0.7"
+strum = { features = ["derive"], version = "0.24" }
+tokio = { features = ["full"], version = "1" }
+tower = "0.4"
+tower-http = { features = ["full"], version = "0.4" }
+tracing = "0.1"
+tracing-subscriber = { features = ["env-filter"], version = "0.3" }
+
+[dev-dependencies]
+
 
 [profile.dev]
 codegen-units = 256

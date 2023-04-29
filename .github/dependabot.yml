@@ -12,11 +12,3 @@ updates:
     directory: /
     schedule:
         interval: daily
-  - package-ecosystem: cargo
-    directory: /bin
-    schedule:
-        interval: daily
-  - package-ecosystem: cargo
-    directory: /xtask
-    schedule:
-        interval: daily

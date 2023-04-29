@@ -36,10 +36,6 @@ pub enum State {
 }
 
 impl State {
-    pub fn default_state(mut self, val: State) -> Self {
-        self = val;
-        self
-    }
     pub fn idle() -> Self {
         Self::Idle
     }

@@ -11,6 +11,8 @@ on:
     tags: [ "nightly*",  "v*.*.*" ]
   release:
     types: [ created ]
+  repository_dispatch:
+    types: [ rust ]
   schedule:
     - cron: "30 9 * * *"
   workflow_dispatch:
