@@ -5,7 +5,16 @@
 */
 pub use self::{constants::*, types::*};
 
-mod constants {}
+mod constants {
+
+    pub const LOCALHOST: [u8; 4] = [0, 0, 0, 0];
+    /// [DEFAULT_SERVER_HOST] is the default host for the server
+    pub const DEFAULT_SERVER_HOST: [u8; 4] = [0, 0, 0, 0];
+    /// [DEFAULT_SERVER_PORT] is the default port for the server
+    pub const DEFAULT_SERVER_PORT: u16 = 8080;
+    /// [DEFAULT_SERVER_ADDR] is the default address for the server
+    pub const DEFAULT_SERVER_ADDR: &str = "0.0.0.0:8080";
+}
 
 mod types {
     use std::sync::{Arc, Mutex};

@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
     Description: ... summary ...
 */
-use crate::Settings;
+use crate::{Logger, Settings};
 use decanter::prelude::Hashable;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
@@ -21,7 +21,12 @@ impl Context {
             workdir: workdir.unwrap_or_else(crate::project_root),
         }
     }
-    
+    pub fn address(&self) -> std::net::SocketAddr {
+        self.cnf.server.address()
+    }
+    pub fn logger(&self) -> &Logger {
+        &self.cnf.logger
+    }
     pub fn name(&self) -> String {
         env!("CARGO_PKG_NAME").to_string()
     }
