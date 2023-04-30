@@ -25,15 +25,15 @@ RUN apt-get install -y libssl-dev protobuf-compiler
 
 FROM runner-base
 
-ENV RUST_LOG="info" \
-    SERVER_PORT=8080 
+ENV PORT=8080 \
+    RUST_LOG="info"
 
 COPY --chown=55 .config /config
 VOLUME ["/config"]
 
 COPY --from=builder /app/target/release/template-rs-api /bin/template-rs-api
 
-EXPOSE ${SERVER_PORT}
+EXPOSE ${PORT}
 EXPOSE 6379
 
 CMD [ "template-rs-api" ]
