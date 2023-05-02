@@ -77,7 +77,7 @@ impl Settings {
         builder = builder.add_source(
             Environment::default()
                 .separator("__")
-                .prefix(package_name().to_ascii_uppercase().as_str()),
+                .prefix("API"),
         );
         // Try gathering valid configuration files...
         if let Ok(files) = try_collect_config_files("**/*.config.*", false) {
