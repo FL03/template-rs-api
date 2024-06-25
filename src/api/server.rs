@@ -75,7 +75,7 @@ impl Server {
 
 mod builder {
     use crate::config::Context;
-    use crate::routes::api_router;
+    use crate::routes;
     use axum::{
         extract::Request,
         response::IntoResponse,
@@ -110,7 +110,7 @@ mod builder {
         }
 
         pub fn routes(self) -> Self {
-            self.nest("/api", api_router())
+            self.nest("/api", routes::v0())
         }
 
         pub fn serve_dir(self, path: &str, workdir: &str) -> Self {

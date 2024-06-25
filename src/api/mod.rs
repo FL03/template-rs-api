@@ -5,6 +5,7 @@
 pub use self::prelude::*;
 
 pub(crate) mod app;
+pub(crate) mod server;
 
 pub(crate) mod utils {
 
@@ -19,5 +20,6 @@ pub(crate) mod utils {
 
 pub(crate) mod prelude {
     pub use super::app::App;
+    pub use super::server::{Server, ServerBuilder};
     pub use super::utils::*;
 }
