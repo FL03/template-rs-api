@@ -1,25 +1,12 @@
-version: "4"
+version: '2'
 services:
-  app:
-    build:
+  server:
+    build: 
       context: .
-      dockerfile: dockerfile
-    container_name: application
-    depends_on:
-      - cache
+      dockerfile: .docker/api/Dockerfile
+    environment:
+      SERVER_PORT: 8080
+    stop_signal: SIGINT
     ports:
-      - 8080:8080
-      - 6379:6379
-    restart: always
-    tty: true
-    volumes:
-      - .config:/config
-  cache:
-    image: redis:latest
-    container_name: redis
-    ports:
-      - 6379:6379
+      - '8080:8080'
 
-volumes:
-  config:
-  data:

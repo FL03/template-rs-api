@@ -1,62 +1,57 @@
-# Config
-**/config.*
-**/*.config.*
-
-**/*.env
-**/*.env.*
-
-# Directories
-**/__pycache__/
-**/__sapper__/
-
-**/.DS_STORE/
+# Artifacts
+**/.artifacts/cache/
 **/.artifacts/data/
-**/.docker/data/
-**/.idea/
-**/.pytest_cache/
-**/.svelte-kit/
-**/.vscode/
+**/.artifacts/tmp/
 
-**/artifacts/
-**/build/
-**/debug/
-**/dist/
-**/env/
-**/node_modules/
-**/pkg/
-**/target/
-**/tmp/
-**/venv/
+# Development
 
-# File Extensions
-**/*.bk
-**/*.bk.*
+## Config
+**/.config/*.config.*
 
-**/*.csv
-**/*.csv.*
+*.env
+*.env.*
 
-**/*.db
-**/*.db.*
-
-**/*.db-*.*
-
-**/*.lock
-**/*.lock.*
-
-**/*-lock.*
-
-**/*.log
-**/*.log.*
-
-**/*.whl
-**/*.whl.*
-
-**/*.zip
-**/*.zip.*
-
-# Exceptions
-!**/default.config.*
+!**/.config/default.config.*
+!**/env.example
 !**/*.env.example
-!**/*.config.js
-!**/*.config.cjs
-!**/flake.lock
+
+## Logs
+*.log
+*.log.*
+
+# Language Specific
+
+### NodeJS
+**/build/
+**/node_modules/
+
+
+**/package-lock.json
+
+### Rust-Lang
+**/debug/
+**/target/
+
+Cargo.lock
+
+*.bk
+*.bk.*
+
+# Misc
+
+## File Extensions
+*.db
+*.db.*
+
+*.csv
+*.csv.*
+
+*.lock
+*.lock.*
+
+*-lock.json
+
+!flake.lock
+
+*.zip
+*.zip.*

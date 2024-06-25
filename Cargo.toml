@@ -1,72 +1,65 @@
 [package]
 authors = ["FL03 <jo3mccain@icloud.com> (https://github.com/FL03)"]
 categories = []
-default-run = "template-rs-api"
-description = "template-api-rs is a complete template for creating high-preformance RESTful API's in Rust"
+description = "A template RESTful API built on Rust with the Axum webframework."
 edition = "2021"
+homepage = "https://github.com/FL03/template-rs-api/wikis"
 keywords = []
-homepage = "https://github.com/FL03/template-api-rs/wiki"
 license = "Apache-2.0"
 name = "template-rs-api"
+publish = false
+repository = "https://github.com/FL03/template-rs-api.git"
 readme = "README.md"
-repository = "https://github.com/FL03/template-api-rs"
-version = "0.0.2"
+version = "0.1.0"
 
 [[bin]]
-bench = true
+bench = false
 doctest = false
 name = "template-rs-api"
 path = "src/main.rs"
-test = true
 
 [build-dependencies]
 
 [dependencies]
-# Custom crates
-decanter = { features = ["derive"], version = "0.1.5" }
-
-# Standard dependencies
 anyhow = "1"
-async-trait = "0.1"
-axum = { features = ["headers", "http2", "macros"], version = "0.6" }
-axum-core = "0.3"
-chrono = "0.4"
-config = "0.13"
-futures = "0.3.25"
+config = "0.14"
+futures = "0.3"
+futures-util = "0.3"
 glob = "0.3"
-http = "0.2.8"
-hyper = { features = [], version = "0.14" }
+http = "1"
 serde = { features = ["derive"], version = "1" }
 serde_json = "1"
+strum = { features = ["derive"], version = "0.26" }
 smart-default = "0.7"
-strum = { features = ["derive"], version = "0.25" }
-tokio = { features = ["full"], version = "1" }
 tower = "0.4"
-tower-http = { features = ["full"], version = "0.4" }
-tracing = "0.1"
-tracing-subscriber = { features = ["env-filter"], version = "0.3" }
+tower-service = "0.3"
+
+[dependencies.axum]
+features = ["macros"]
+version = "0.7"
+
+[dependencies.hyper]
+features = ["full"]
+version = "1"
+
+[dependencies.tokio]
+features = ["full"]
+version = "1"
+
+[dependencies.tower-http]
+features = [
+    "fs",
+    "trace"
+]
+version = "0.5"
+
+[dependencies.tracing]
+features = ["log"]
+version = "0.1"
+
+[dependencies.tracing-subscriber]
+features = ["env-filter"]
+version = "0.3"
 
 [dev-dependencies]
 
-
-[profile.dev]
-codegen-units = 256
-debug = true
-debug-assertions = true
-incremental = true
-lto = false
-panic = 'unwind'
-rpath = false
-opt-level = 0
-overflow-checks = true
-
-[profile.release]
-codegen-units = 16
-debug = false
-debug-assertions = false
-incremental = false
-lto = false
-panic = 'unwind'
-rpath = false
-opt-level = 'z'
-overflow-checks = false

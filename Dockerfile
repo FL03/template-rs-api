@@ -1,38 +1,30 @@
-FROM rust:latest as base
+FROM rust:latest as builder-base
 
-RUN apt-get update -y && apt-get upgrade -y
-
-FROM base as builder-base
-
-RUN apt-get install -y \
-    protobuf-compiler
+RUN apt-get update -y && \
+    apt-get upgrade -y && \
+    rustup update
 
 FROM builder-base as builder
 
-ENV CARGO_TERM_COLOR=always
+ADD . /workspace
 
-ADD . /app
-WORKDIR /app
+WORKDIR /workspace
 
 COPY . .
-RUN cargo build --release -v --workspace
 
-FROM debian:buster-slim as runner-base
+RUN cargo build -r -v
 
-RUN apt-get update -y && apt-get upgrade -y 
+FROM debian:latest as runner-base
 
-RUN apt-get install -y libssl-dev protobuf-compiler
+ENV RUST_LOG=info \
+    SERVER_PORT=8080 
 
-FROM runner-base
+RUN apt-get update -y && apt-get upgrade -y
 
-ENV RUST_LOG="info"
-
-COPY --chown=55 .config /config
-VOLUME ["/config"]
-
-COPY --from=builder /app/target/release/template-rs-api /bin/template-rs-api
+COPY --from=builder /workspace/target/release/pzzld /app/template-rs-api
+COPY --from=builder /workspace/assets /app/assets
+COPY --from=builder /workspace/backend.config.toml /app/backend.config.toml
 
 EXPOSE 8080
-EXPOSE 6379
 
-CMD [ "template-rs-api" ]
+ENTRYPOINT [ "app/template-rs-api" ]
