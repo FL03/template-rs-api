@@ -39,9 +39,7 @@ impl Settings {
             .set_override_option("mode", std::env::var("APPMODE").ok())?
             .set_override_option("server.addr.host", std::env::var("SERVER_HOST").ok())?
             .set_override_option("server.addr.port", std::env::var("SERVER_PORT").ok())?
-            .add_source(collect_configurations("**/.config/*.config.*", false))
-            .add_source(Environment::default().separator("_").prefix("PZZLD"))
-            .add_source(config::File::with_name("Puzzled.toml"));
+            .add_source(config::File::with_name(".config/default.config.toml"));
         Ok(builder)
     }
 

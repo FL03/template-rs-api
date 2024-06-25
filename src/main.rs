@@ -8,7 +8,8 @@ pub mod routes;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    // let addr = "0"
+    let cnf = config::Settings::build()?;
+    println!("{cnf}");
 
     Ok(())
 }
