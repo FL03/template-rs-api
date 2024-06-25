@@ -1,34 +1,59 @@
-
+/*
+    Appellation: app <module>
+    Contrib: FL03 <jo3mccain@icloud.com>
+*/
+use super::Server;
 use crate::config::{Context, Settings};
 use std::sync::Arc;
 
 pub struct App {
     pub(crate) ctx: Arc<Context>,
+    server: Server,
 }
 
 impl App {
     pub fn new(ctx: Arc<Context>) -> Self {
-        Self { ctx }
+        let server = Server::new(ctx.clone());
+
+        Self { ctx, server }
     }
 
     pub fn from_config(cnf: Settings) -> Self {
-        Self {
-            ctx: Arc::new(Context::from_config(cnf)),
-        }
+        let ctx = Context::from_config(cnf);
+        Self::new(ctx.into_shared())
     }
 
     pub fn ctx(&self) -> &Arc<Context> {
         &self.ctx
     }
 
-    pub async fn serve(&self) -> std::io::Result<()> {
-        let ctx = self.ctx.clone();
-        let app = crate::routes::_api(ctx);
+    pub fn with_tracing(&self) {
+        self.ctx.init_tracing();
+    }
 
-        let listener = self.ctx().server().bind().await?;
-        let router = app.into_make_service();
-        let server = axum::serve(listener, router).with_graceful_shutdown(super::shutdown());
+    pub async fn serve(self) -> std::io::Result<()> {
+        self.server.serve().await
+    }
+}
 
-        server.await
+/*
+    ************* Implementations *************
+*/
+
+impl From<Arc<Context>> for App {
+    fn from(ctx: Arc<Context>) -> Self {
+        Self::new(ctx)
+    }
+}
+
+impl From<Context> for App {
+    fn from(ctx: Context) -> Self {
+        Self::new(ctx.into_shared())
+    }
+}
+
+impl From<Settings> for App {
+    fn from(cnf: Settings) -> Self {
+        Self::from_config(cnf)
     }
 }
