@@ -2,10 +2,7 @@
     Appellation: base <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use axum::{
-    extract::{Json, Path},
-    Extension,
-};
+use axum::extract::{Json, Path};
 use serde_json::Value;
 
 pub async fn home() -> Json<Value> {

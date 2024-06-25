@@ -8,26 +8,19 @@ pub use self::{context::*, kinds::prelude::*, settings::*};
 pub(crate) mod context;
 pub(crate) mod settings;
 
-pub const LOCALHOST: &str = "127.0.0.1";
-pub(crate) type ArcCtx = std::sync::Arc<Context>;
-
 pub mod kinds {
     #[doc(inline)]
     pub use self::prelude::*;
 
-    pub mod mode;
-    pub mod server;
+    pub(crate) mod logger;
+    pub(crate) mod mode;
+    pub(crate) mod server;
 
     pub(crate) mod prelude {
+        pub use super::logger::*;
         pub use super::mode::*;
         pub use super::server::*;
     }
-}
-
-pub(crate) mod prelude {
-    pub use super::context::Context;
-    pub use super::kinds::prelude::*;
-    pub use super::settings::Settings;
 }
 
 pub(crate) mod utils {

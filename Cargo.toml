@@ -1,6 +1,7 @@
 [package]
 authors = ["FL03 <jo3mccain@icloud.com> (https://github.com/FL03)"]
 categories = []
+default-run = "taxum"
 description = "A template RESTful API built on Rust with the Axum webframework."
 edition = "2021"
 homepage = "https://github.com/FL03/template-rs-api/wikis"
@@ -15,7 +16,7 @@ version = "0.1.0"
 [[bin]]
 bench = false
 doctest = false
-name = "template-rs-api"
+name = "taxum"
 path = "src/main.rs"
 
 [build-dependencies]
@@ -23,13 +24,8 @@ path = "src/main.rs"
 [dependencies]
 anyhow = "1"
 config = "0.14"
-futures = "0.3"
-futures-util = "0.3"
 glob = "0.3"
-http = "1"
-serde = { features = ["derive"], version = "1" }
 serde_json = "1"
-strum = { features = ["derive"], version = "0.26" }
 smart-default = "0.7"
 tower = "0.4"
 
@@ -37,9 +33,13 @@ tower = "0.4"
 features = ["macros"]
 version = "0.7"
 
-[dependencies.hyper]
-features = ["full"]
+[dependencies.serde]
+features = ["derive"]
 version = "1"
+
+[dependencies.strum]
+features = ["derive"]
+version = "0.26"
 
 [dependencies.tokio]
 features = ["full"]

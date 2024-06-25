@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use super::Settings;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 pub trait Ctx: Send + Sync {
     type Config;
@@ -50,6 +50,14 @@ impl Context {
 
     pub fn into_ext(self) -> axum::Extension<Self> {
         axum::Extension(self)
+    }
+
+    pub fn into_shared(self) -> Arc<Self> {
+        Arc::new(self)
+    }
+
+    pub fn into_mut_shared(self) -> Arc<Mutex<Self>> {
+        Arc::new(Mutex::new(self))
     }
 
     pub fn with_tracing(self) -> Self {

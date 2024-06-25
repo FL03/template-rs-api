@@ -2,10 +2,12 @@
     Appellation: settings <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::config::{collect_configurations, LOCALHOST};
+use crate::config::collect_configurations;
 use config::{Config, ConfigError, Environment};
 use core::net::{IpAddr, SocketAddr};
 use tokio::net::TcpListener;
+
+pub const LOCALHOST: &str = "127.0.0.1";
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, serde::Deserialize, serde::Serialize,
@@ -31,7 +33,7 @@ impl ServerConfig {
 
     pub fn builder() -> Result<Self, ConfigError> {
         Config::builder()
-            .set_default("server.host", "0.0.0.0")?
+            .set_default("server.host", LOCALHOST)?
             .set_default("server.port", 8080)?
             .add_source(Environment::default().separator("_").prefix("NETWORK"))
             .add_source(collect_configurations("**/*.config.*", false))
@@ -49,6 +51,10 @@ impl ServerConfig {
 
     pub fn as_socket_addr(&self) -> SocketAddr {
         self.addr().addr()
+    }
+
+    pub async fn bind(&self) -> std::io::Result<TcpListener> {
+        TcpListener::bind(self.as_socket_addr()).await
     }
 
     pub fn set_addr(&mut self, addr: ServerAddr) {
@@ -94,7 +100,8 @@ impl ServerAddr {
         Config::builder()
             .set_default("host", LOCALHOST)?
             .set_default("port", 8080)?
-            .add_source(Environment::default().separator("_").prefix("SERVER"))
+            .set_override_option("host", std::env::var("SERVER_HOST").ok())?
+            .set_override_option("port", std::env::var("SERVER_PORT").ok())?
             .add_source(collect_configurations("**/*.config.*", false))
             .build()?
             .try_deserialize()
@@ -171,7 +178,7 @@ mod impl_server {
 
     impl Default for ServerAddr {
         fn default() -> Self {
-            Self::new(LOCALHOST, 8080)
+            Self::new(LOCALHOST.to_string(), 8080)
         }
     }
 

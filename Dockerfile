@@ -10,9 +10,9 @@ RUN \
     --mount=type=cache,target=/app/target/ \
     --mount=type=cache,target=/usr/local/cargo/registry/ \
     cargo build --release && \
-    cp ./target/release/template-rs-api /
+    cp ./target/release/taxum /
 
-FROM debian:bookworm-slim AS final
+FROM debian:bookworm-slim AS runner-builder
 
 RUN adduser \
     --disabled-password \
@@ -23,19 +23,21 @@ RUN adduser \
     --uid "10001" \
     appuser
 
-COPY --from=builder /template-rs-api /usr/local/bin
+COPY --from=builder /taxum /usr/local/bin
 
-RUN chown appuser /usr/local/bin/template-rs-api
+RUN chown appuser /usr/local/bin/taxum
 
-COPY --from=builder /app/.config /opt/template-rs-api/.config
-COPY --from=builder /app/assets /opt/template-rs-api/assets
+COPY --from=builder /app/.config /opt/taxum/.config
+COPY --from=builder /app/assets /opt/taxum/assets
 
-RUN chown -R appuser /opt/template-rs-api
+RUN chown -R appuser /opt/taxum
 
 USER appuser
 
-ENV RUST_LOG="template_rs_api=debug,info"
+ENV RUST_LOG="taxum=debug,info"
 
-WORKDIR /opt/template-rs-api
-ENTRYPOINT ["template-rs-api"]
+WORKDIR /opt/taxum
+
+ENTRYPOINT ["taxum"]
+
 EXPOSE 8080/tcp
