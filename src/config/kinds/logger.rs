@@ -2,9 +2,21 @@
     Appellation: logger <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, serde::Deserialize, serde::Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    serde::Deserialize,
+    serde::Serialize,
+)]
 pub struct LoggerConfig {
-    pub level: LogLevel
+    pub level: LogLevel,
 }
 
 #[derive(
@@ -37,7 +49,7 @@ pub enum LogLevel {
     Trace,
     Warn,
     #[default]
-    Off
+    Off,
 }
 
 impl LoggerConfig {
@@ -79,15 +91,13 @@ impl LogLevel {
             Self::Info => Some(Level::INFO),
             Self::Trace => Some(Level::TRACE),
             Self::Warn => Some(Level::WARN),
-            Self::Off => None
+            Self::Off => None,
         }
     }
-
 }
 
-
 /*
-    ************* Implementations *************
+ ************* Implementations *************
 */
 impl core::fmt::Display for LoggerConfig {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
@@ -102,7 +112,6 @@ unsafe impl Sync for LoggerConfig {}
 mod impl_level {
     use super::*;
 
-    
     impl From<LogLevel> for config::Value {
         fn from(level: LogLevel) -> Self {
             level.to_string().into()
@@ -121,9 +130,7 @@ mod impl_level {
         }
     }
 
-
     unsafe impl Send for LogLevel {}
 
     unsafe impl Sync for LogLevel {}
-
 }

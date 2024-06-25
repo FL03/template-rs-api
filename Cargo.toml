@@ -21,12 +21,13 @@ path = "src/main.rs"
 
 [build-dependencies]
 
+[dev-dependencies]
+
 [dependencies]
 anyhow = "1"
 config = "0.14"
 glob = "0.3"
 serde_json = "1"
-smart-default = "0.7"
 tower = "0.4"
 
 [dependencies.axum]
@@ -59,6 +60,3 @@ version = "0.1"
 [dependencies.tracing-subscriber]
 features = ["env-filter"]
 version = "0.3"
-
-[dev-dependencies]
-

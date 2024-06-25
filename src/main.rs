@@ -14,13 +14,21 @@ use self::config::{Context, Settings};
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let cnf = Settings::build()?;
+    let app = App::from_config(cnf).with_tracing();
+    app.serve().await?;
+
+    Ok(())
+}
+
+async fn _run() -> anyhow::Result<()> {
+    let cnf = Settings::build()?;
     let ctx = Context::from_config(cnf.clone());
     println!("{ctx}");
 
     let listener = ctx.server().bind().await?;
     let service = routes::v0().into_make_service();
-    axum::serve(listener, service).with_graceful_shutdown(api::shutdown()).await?;
-
+    axum::serve(listener, service)
+        .with_graceful_shutdown(api::shutdown())
+        .await?;
     Ok(())
 }
-

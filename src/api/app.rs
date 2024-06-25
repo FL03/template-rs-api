@@ -27,8 +27,10 @@ impl App {
         &self.ctx
     }
 
-    pub fn with_tracing(&self) {
+    pub fn with_tracing(self) -> Self {
         self.ctx.init_tracing();
+        tracing::info!("Successfully initialized the tracing layers...");
+        self
     }
 
     pub async fn serve(self) -> std::io::Result<()> {
@@ -37,7 +39,7 @@ impl App {
 }
 
 /*
-    ************* Implementations *************
+ ************* Implementations *************
 */
 
 impl From<Arc<Context>> for App {

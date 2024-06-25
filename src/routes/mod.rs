@@ -20,7 +20,5 @@ pub(crate) fn v0<S: Clone + Send + Sync + 'static>() -> Router<S> {
 }
 
 pub(crate) fn _api(ctx: Arc<Context>) -> Router {
-    Router::new()
-        .nest("/", v0())
-        .layer(axum::Extension(ctx))
+    Router::new().nest("/", v0()).layer(axum::Extension(ctx))
 }
