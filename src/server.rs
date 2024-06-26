@@ -49,10 +49,10 @@ impl Server {
 
     pub async fn serve(self) -> std::io::Result<()> {
         let listener = self.listen().await?;
-        let router = self.router.into_make_service();
+        let Server { ctx, router } = self;
 
-        axum::serve(listener, router)
-            .with_graceful_shutdown(utils::shutdown())
+        axum::serve(listener, router.into_make_service())
+            .with_graceful_shutdown(utils::shutdown(ctx))
             .await
     }
 
@@ -69,7 +69,11 @@ impl Server {
 }
 
 pub(crate) mod utils {
-    pub async fn shutdown() {
+    use std::sync::Arc;
+
+    pub async fn shutdown(ctx: Arc<crate::Context>) {
+        tracing::info!("Closing the database connection...");
+        ctx.db().close().await;
         tokio::signal::ctrl_c()
             .await
             .expect("CTRL+C: shutdown failed");

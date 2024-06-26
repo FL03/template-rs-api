@@ -9,9 +9,9 @@ pub(crate) mod primitives;
 pub mod app;
 pub mod config;
 pub mod ctx;
+pub mod models;
 pub mod routes;
 pub mod server;
-pub mod states;
 
 pub mod prelude {
     pub use crate::app::App;

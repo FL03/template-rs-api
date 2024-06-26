@@ -53,6 +53,7 @@ features = [
     "any",
     "postgres",
     "runtime-tokio",
+    "uuid"
 ]
 version = "0.7"
 
@@ -78,3 +79,12 @@ version = "0.1"
 [dependencies.tracing-subscriber]
 features = ["env-filter"]
 version = "0.3"
+
+[dependencies.uuid]
+features = [
+    "fast-rng",
+    "macro-diagnostics",
+    "serde",
+    "v4"
+]
+version = "1"

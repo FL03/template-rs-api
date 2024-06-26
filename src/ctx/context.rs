@@ -2,7 +2,9 @@
     Appellation: context <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::config::Settings;
+use crate::Settings;
+use crate::models::SampleModel;
+use sqlx::FromRow;
 use std::sync::Arc;
 
 pub type DbPool = sqlx::PgPool;
@@ -32,6 +34,16 @@ impl Context {
 
     pub fn into_shared(self) -> Arc<Self> {
         Arc::new(self)
+    }
+
+    pub async fn fetch_samples(&self) -> sqlx::Result<Vec<SampleModel>> {
+        let query = sqlx::query("SELECT * FROM samples").fetch_all(&self.db).await?;
+        let samples = query.iter().filter_map(| item | SampleModel::from_row(item).map_err(|err| tracing::error!("{err}")).ok()).collect();
+        Ok(samples)
+    }
+    pub async fn _fetch_samples(&self) -> sqlx::Result<Vec<sqlx::postgres::PgRow>> {
+        let query = sqlx::query("SELECT * FROM samples").fetch_all(&self.db).await?;
+        Ok(query)
     }
 }
 

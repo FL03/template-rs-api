@@ -6,11 +6,12 @@ use crate::AppState;
 use axum::extract::{Json, Path, State};
 use serde_json::Value;
 
+
 pub async fn home(State(ctx): State<AppState>) -> Json<Value> {
     let data = serde_json::json!({
         "message": "Hello, World!",
         "mode": ctx.settings().mode(),
-
+        "samples": ctx.fetch_samples().await.unwrap_or_default(),
     });
     axum::Json(data)
 }
