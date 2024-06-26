@@ -5,20 +5,22 @@
 
 pub mod base;
 
-use crate::config::Context;
+use crate::AppState;
 use axum::{
     routing::{get, post},
     Router,
 };
-use std::sync::Arc;
 
-pub(crate) fn v0<S: Clone + Send + Sync + 'static>() -> Router<S> {
+
+
+pub(crate) fn v0<S>(state: AppState) -> Router<S> where S: Clone + Send + Sync + 'static {
     Router::new()
         .route("/", get(base::home))
         .route("/sample/:id", get(base::get_sample))
         .route("/sample/:id", post(base::post_sample))
+        .with_state(state)
 }
 
-pub(crate) fn _api(ctx: Arc<Context>) -> Router {
-    Router::new().nest("/", v0()).layer(axum::Extension(ctx))
-}
+// pub(crate) fn _api(ctx: AppState) -> ApiRouterTy {
+//     Router::new().nest("/", v0()).layer(Extension(ctx))
+// }

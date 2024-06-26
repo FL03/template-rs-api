@@ -2,12 +2,15 @@
     Appellation: base <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use axum::extract::{Json, Path};
+use crate::AppState;
+use axum::extract::{Json, Path, State};
 use serde_json::Value;
 
-pub async fn home() -> Json<Value> {
+pub async fn home(State(ctx): State<AppState>) -> Json<Value> {
     let data = serde_json::json!({
         "message": "Hello, World!",
+        "mode": ctx.settings().mode(),
+
     });
     axum::Json(data)
 }

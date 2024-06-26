@@ -2,13 +2,12 @@
     Appellation: settings <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::{collect_configurations, LogLevel, LoggerConfig, Mode, ServerAddr, ServerConfig};
+use super::{collect_configurations, LogLevel, LoggerConfig, Mode, ServerConfig};
 use config::builder::{ConfigBuilder, DefaultState};
 
 #[derive(
     Clone,
     Debug,
-    Default,
     Eq,
     Hash,
     Ord,
@@ -21,6 +20,7 @@ pub struct Settings {
     pub logger: LoggerConfig,
     pub mode: Mode,
     pub server: ServerConfig,
+    pub version: String,
 }
 
 impl Settings {
@@ -29,6 +29,7 @@ impl Settings {
             logger: LoggerConfig::default(),
             mode: Mode::Development,
             server: ServerConfig::default(),
+            version: env!("CARGO_PKG_VERSION").to_string(),
         }
     }
 
@@ -45,6 +46,7 @@ impl Settings {
             .add_source(config::File::with_name(".config/default.config.toml"));
         // setup overrides
         builder = builder
+            .set_override("version", env!("CARGO_PKG_VERSION"))?
             .set_override_option("mode", std::env::var("APPMODE").ok())?
             .set_override_option("server.addr.host", std::env::var("SERVER_HOST").ok())?
             .set_override_option("server.addr.port", std::env::var("SERVER_PORT").ok())?;
@@ -85,19 +87,19 @@ impl Settings {
         &mut self.server
     }
 
-    pub const fn server_addr(&self) -> &ServerAddr {
-        &self.server().addr()
-    }
-
-    pub fn server_addr_mut(&mut self) -> &mut ServerAddr {
-        self.server_mut().addr_mut()
+    pub fn version(&self) -> &str {
+        &self.version
     }
 }
 
 /*
  ************* Implementations *************
 */
-
+impl Default for Settings {
+    fn default() -> Self {
+        Self::debug()
+    }
+}
 impl core::fmt::Display for Settings {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         f.write_str(&serde_json::to_string(self).unwrap())

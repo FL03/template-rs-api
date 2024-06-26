@@ -17,7 +17,12 @@ version = "0.1.0"
 bench = false
 doctest = false
 name = "taxum"
-path = "src/main.rs"
+path = "src/bin/taxum.rs"
+
+[lib]
+bench = false
+crate-type = ["cdylib", "rlib"]
+doctest = false
 
 [build-dependencies]
 
@@ -27,11 +32,14 @@ path = "src/main.rs"
 anyhow = "1"
 config = "0.14"
 glob = "0.3"
+lazy_static = "1"
 serde_json = "1"
 tower = "0.4"
 
 [dependencies.axum]
-features = ["macros"]
+features = [
+    "macros"
+]
 version = "0.7"
 
 [dependencies.serde]

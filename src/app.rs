@@ -2,8 +2,8 @@
     Appellation: app <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::Server;
 use crate::config::{Context, Settings};
+use crate::server::Server;
 use std::sync::Arc;
 
 pub struct App {
@@ -23,8 +23,12 @@ impl App {
         Self::new(ctx.into_shared())
     }
 
-    pub fn ctx(&self) -> &Arc<Context> {
+    pub fn ctx(&self) -> &Context {
         &self.ctx
+    }
+
+    pub fn cnf(&self) -> &Settings {
+        self.ctx.settings()
     }
 
     pub fn with_tracing(self) -> Self {
@@ -33,7 +37,7 @@ impl App {
         self
     }
 
-    pub async fn serve(self) -> std::io::Result<()> {
+    pub async fn run(self) -> std::io::Result<()> {
         self.server.serve().await
     }
 }
