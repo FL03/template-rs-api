@@ -1,5 +1,6 @@
 environment = "production"
 name = ""
+version = "v0"
 
 [server]
 
