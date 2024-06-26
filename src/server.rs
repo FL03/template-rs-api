@@ -70,14 +70,14 @@ impl Server {
 
 pub(crate) mod utils {
     use std::sync::Arc;
-
+    #[tracing::instrument(skip_all, name = "shutdown", target = "app")]
     pub async fn shutdown(ctx: Arc<crate::Context>) {
-        tracing::info!("Closing the database connection...");
-        ctx.db().close().await;
+        
         tokio::signal::ctrl_c()
             .await
             .expect("CTRL+C: shutdown failed");
-
-        tracing::info!("Shutdown the server...");
+        tracing::warn!("Closing the database connection...");
+        ctx.db().close().await;
+        tracing::warn!("Shutdown the server...");
     }
 }

@@ -2,7 +2,7 @@ environment = "production"
 version = "v0"
 
 [logger]
-level = "info"
+level = "trace"
 
 [server]
 
