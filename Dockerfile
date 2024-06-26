@@ -10,7 +10,7 @@ RUN \
     --mount=type=cache,target=/app/target/ \
     --mount=type=cache,target=/usr/local/cargo/registry/ \
     cargo build --release && \
-    cp ./target/release/taxum /
+    cp ./target/release/tapp /
 
 FROM debian:bookworm-slim AS runner-builder
 
@@ -23,21 +23,21 @@ RUN adduser \
     --uid "10001" \
     appuser
 
-COPY --from=builder /taxum /usr/local/bin
+COPY --from=builder /tapp /usr/local/bin
 
-RUN chown appuser /usr/local/bin/taxum
+RUN chown appuser /usr/local/bin/tapp
 
-COPY --from=builder /app/.config /opt/taxum/.config
-COPY --from=builder /app/assets /opt/taxum/assets
+COPY --from=builder /app/.config /opt/tapp/.config
+COPY --from=builder /app/assets /opt/tapp/assets
 
-RUN chown -R appuser /opt/taxum
+RUN chown -R appuser /opt/tapp
 
 USER appuser
 
-ENV RUST_LOG="taxum=debug,info"
+ENV RUST_LOG="tapp=debug,info"
 
-WORKDIR /opt/taxum
+WORKDIR /opt/tapp
 
-ENTRYPOINT ["taxum"]
+ENTRYPOINT ["tapp"]
 
 EXPOSE 8080/tcp

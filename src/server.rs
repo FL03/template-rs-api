@@ -14,7 +14,7 @@ use tokio::net::TcpListener;
 
 pub struct Server {
     ctx: Arc<Context>,
-    router: ApiRouterTy,
+    router: Router,
 }
 
 impl Server {

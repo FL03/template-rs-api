@@ -3,12 +3,11 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 pub(crate) use self::utils::*;
-pub use self::{context::*, kinds::prelude::*, settings::*};
+pub use self::{kinds::*, settings::*};
 
-pub(crate) mod context;
 pub(crate) mod settings;
 
-pub mod kinds {
+mod kinds {
     #[doc(inline)]
     pub use self::prelude::*;
 
@@ -45,17 +44,5 @@ pub(crate) mod utils {
     /// Attempts to collect configuration files, following the given pattern, into a ConfigFileVec
     pub fn collect_configurations(pattern: &str, required: bool) -> ConfigFileVec {
         gather(pattern, |p| ConfigFile::from(p).required(required))
-    }
-
-    pub(crate) fn init_tracing(level: tracing::Level) {
-        use tracing_subscriber::fmt::time;
-
-        tracing_subscriber::fmt()
-            .compact()
-            .with_ansi(true)
-            .with_max_level(level)
-            .with_target(false)
-            .with_timer(time::uptime())
-            .init();
     }
 }

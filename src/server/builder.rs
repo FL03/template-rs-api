@@ -2,14 +2,13 @@
     Appellation: builder <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::{AppState, Context};
 use crate::routes;
+use crate::{AppState, Context};
 use axum::{
     extract::Request,
     response::IntoResponse,
     routing::{MethodRouter, Route},
-    Extension,
-    Router,
+    Extension, Router,
 };
 use core::convert::Infallible;
 use std::sync::Arc;
@@ -20,7 +19,7 @@ pub struct ServerBuilder<S = ()> {
     router: Router<S>,
 }
 
-impl<S> ServerBuilder<S> 
+impl<S> ServerBuilder<S>
 where
     S: Clone + Send + Sync + 'static,
 {
@@ -65,7 +64,7 @@ where
     pub fn build(self) -> Router<S> {
         self.router
     }
-    
+
     pub fn layer<L>(self, layer: L) -> Self
     where
         L: Clone + Layer<Route> + Send + 'static,
@@ -111,5 +110,91 @@ where
     pub fn with_state<S2>(self, state: S) -> ServerBuilder<S2> {
         let router = self.router.with_state(state);
         ServerBuilder { router }
+    }
+}
+
+pub trait AxumBuilder<S> {
+    fn layer<L>(self, layer: L) -> Self
+    where
+        L: Clone + Layer<Route> + Send + 'static,
+        L::Service: Clone + Service<Request> + Send + 'static,
+        <L::Service as Service<Request>>::Error: Into<Infallible> + 'static,
+        <L::Service as Service<Request>>::Future: Send + 'static,
+        <L::Service as Service<Request>>::Response: IntoResponse + 'static;
+
+    fn nest(self, path: &str, router: Router<S>) -> Self;
+
+    fn nest_service<T>(self, path: &str, svc: T) -> Self
+    where
+        T: Clone + Send + Service<Request, Error = Infallible> + 'static,
+        T::Response: IntoResponse,
+        T::Future: Send + 'static;
+
+    fn route(self, path: &str, method: MethodRouter<S>) -> Self;
+
+    fn route_service<T>(self, path: &str, svc: T) -> Self
+    where
+        T: Clone + Send + Service<Request, Error = Infallible> + 'static,
+        T::Response: IntoResponse,
+        T::Future: Send + 'static;
+}
+
+pub trait AxumBuilderExt<S = (), T = ()> {
+    type Other: AxumBuilder<T>;
+
+    fn with_state(self, state: S) -> Self::Other;
+}
+
+impl<S> AxumBuilder<S> for axum::Router<S>
+where
+    S: Clone + Send + Sync + 'static,
+{
+    fn layer<L>(self, layer: L) -> Self
+    where
+        L: Clone + Layer<Route> + Send + 'static,
+        L::Service: Clone + Service<Request> + Send + 'static,
+        <L::Service as Service<Request>>::Error: Into<Infallible> + 'static,
+        <L::Service as Service<Request>>::Future: Send + 'static,
+        <L::Service as Service<Request>>::Response: IntoResponse + 'static,
+    {
+        Router::layer(self, layer)
+    }
+
+    fn nest(self, path: &str, router: Router<S>) -> Self {
+        Router::nest(self, path, router)
+    }
+
+    fn nest_service<T>(self, path: &str, svc: T) -> Self
+    where
+        T: Clone + Send + Service<Request, Error = Infallible> + 'static,
+        T::Response: IntoResponse,
+        T::Future: Send + 'static,
+    {
+        Router::nest_service(self, path, svc)
+    }
+
+    fn route(self, path: &str, method: MethodRouter<S>) -> Self {
+        Router::route(self, path, method)
+    }
+
+    fn route_service<T>(self, path: &str, svc: T) -> Self
+    where
+        T: Clone + Send + Service<Request, Error = Infallible> + 'static,
+        T::Response: IntoResponse,
+        T::Future: Send + 'static,
+    {
+        Router::route_service(self, path, svc)
+    }
+}
+
+impl<S, T> AxumBuilderExt<S, T> for axum::Router<S>
+where
+    S: Clone + Send + Sync + 'static,
+    T: Clone + Send + Sync + 'static,
+{
+    type Other = axum::Router<T>;
+
+    fn with_state(self, state: S) -> axum::Router<T> {
+        Router::with_state(self, state)
     }
 }

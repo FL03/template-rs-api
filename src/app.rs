@@ -2,8 +2,11 @@
     Appellation: app <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::config::{Context, Settings};
-use crate::server::Server;
+pub use self::init::*;
+
+pub(crate) mod init;
+
+use crate::{Context, Server, Settings};
 use std::sync::Arc;
 
 pub struct App {
@@ -12,15 +15,13 @@ pub struct App {
 }
 
 impl App {
-    pub fn new(ctx: Arc<Context>) -> Self {
+    pub fn new(cnf: Settings) -> Self {
+        cnf.logger().init_tracing();
+
+        let ctx = Context::from_config(cnf).into_shared();
         let server = Server::new(ctx.clone());
 
         Self { ctx, server }
-    }
-
-    pub fn from_config(cnf: Settings) -> Self {
-        let ctx = Context::from_config(cnf);
-        Self::new(ctx.into_shared())
     }
 
     pub fn ctx(&self) -> &Context {
@@ -32,8 +33,8 @@ impl App {
     }
 
     pub fn with_tracing(self) -> Self {
-        self.ctx.init_tracing();
-        tracing::info!("Successfully initialized the tracing layers...");
+        self.cnf().logger().init_tracing();
+
         self
     }
 
@@ -46,20 +47,14 @@ impl App {
  ************* Implementations *************
 */
 
-impl From<Arc<Context>> for App {
-    fn from(ctx: Arc<Context>) -> Self {
-        Self::new(ctx)
+impl AsRef<Context> for App {
+    fn as_ref(&self) -> &Context {
+        &self.ctx
     }
 }
 
-impl From<Context> for App {
-    fn from(ctx: Context) -> Self {
-        Self::new(ctx.into_shared())
-    }
-}
-
-impl From<Settings> for App {
-    fn from(cnf: Settings) -> Self {
-        Self::from_config(cnf)
+impl AsRef<Settings> for App {
+    fn as_ref(&self) -> &Settings {
+        self.ctx.settings()
     }
 }

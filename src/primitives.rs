@@ -10,8 +10,6 @@ pub(crate) mod prelude {
     pub use crate::primitives::types::*;
 }
 
-
-
 pub mod consts {
     pub const ENV_PREFIX: &str = "APP";
 }
@@ -21,8 +19,7 @@ pub mod types {
 
     pub type Arcm<T = ()> = Arc<Mutex<T>>;
 
-    pub type AppState = Arc<crate::config::Context>;
+    pub type AppState = Arc<crate::ctx::Context>;
 
     pub type ApiRouterTy = axum::Router;
 }
-

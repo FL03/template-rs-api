@@ -2,6 +2,21 @@
     Appellation: logger <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
+pub use self::log_level::*;
+
+pub(crate) fn init_tracing(level: tracing::Level) {
+    use tracing_subscriber::fmt::time;
+
+    tracing_subscriber::fmt()
+        .compact()
+        .with_ansi(true)
+        .with_max_level(level)
+        .with_target(false)
+        .with_timer(time::uptime())
+        .init();
+    tracing::info!("Successfully initialized the tracing layers...");
+}
+
 #[derive(
     Clone,
     Copy,
@@ -19,79 +34,11 @@ pub struct LoggerConfig {
     pub level: LogLevel,
 }
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Default,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    serde::Deserialize,
-    serde::Serialize,
-    strum::AsRefStr,
-    strum::Display,
-    strum::EnumCount,
-    strum::EnumIs,
-    strum::EnumIter,
-    strum::EnumString,
-    strum::VariantNames,
-)]
-#[repr(u8)]
-#[serde(rename_all = "lowercase")]
-#[strum(serialize_all = "lowercase")]
-pub enum LogLevel {
-    Debug,
-    Error,
-    Info,
-    Trace,
-    Warn,
-    #[default]
-    Off,
-}
-
 impl LoggerConfig {
     pub fn init_tracing(&self) {
-        let level = self.level.as_tracing();
+        let level = self.level.as_tracing_level();
         if let Some(level) = level {
-            crate::config::init_tracing(level)
-        }
-    }
-}
-
-impl LogLevel {
-    pub fn debug() -> Self {
-        Self::Debug
-    }
-
-    pub fn info() -> Self {
-        Self::Info
-    }
-
-    pub fn warn() -> Self {
-        Self::Warn
-    }
-
-    pub fn error() -> Self {
-        Self::Error
-    }
-
-    pub fn off() -> Self {
-        Self::Off
-    }
-
-    pub fn as_tracing(&self) -> Option<tracing::Level> {
-        use tracing::Level;
-
-        match self {
-            Self::Debug => Some(Level::DEBUG),
-            Self::Error => Some(Level::ERROR),
-            Self::Info => Some(Level::INFO),
-            Self::Trace => Some(Level::TRACE),
-            Self::Warn => Some(Level::WARN),
-            Self::Off => None,
+            init_tracing(level)
         }
     }
 }
@@ -109,8 +56,99 @@ unsafe impl Send for LoggerConfig {}
 
 unsafe impl Sync for LoggerConfig {}
 
-mod impl_level {
-    use super::*;
+mod log_level {
+    #[derive(
+        Clone,
+        Copy,
+        Debug,
+        Default,
+        Eq,
+        Hash,
+        Ord,
+        PartialEq,
+        PartialOrd,
+        serde::Deserialize,
+        serde::Serialize,
+        strum::AsRefStr,
+        strum::Display,
+        strum::EnumCount,
+        strum::EnumIs,
+        strum::EnumIter,
+        strum::EnumString,
+        strum::VariantNames,
+    )]
+    #[repr(u8)]
+    #[serde(rename_all = "lowercase")]
+    #[strum(serialize_all = "lowercase")]
+    pub enum LogLevel {
+        Debug,
+        Error,
+        Info,
+        Trace,
+        Warn,
+        #[default]
+        Off,
+    }
+
+    impl LogLevel {
+        pub fn from_tracing(level: tracing::Level) -> Self {
+            use tracing::Level;
+
+            match level {
+                Level::DEBUG => Self::Debug,
+                Level::ERROR => Self::Error,
+                Level::INFO => Self::Info,
+                Level::TRACE => Self::Trace,
+                Level::WARN => Self::Warn,
+            }
+        }
+
+        pub fn debug() -> Self {
+            Self::Debug
+        }
+
+        pub fn info() -> Self {
+            Self::Info
+        }
+
+        pub fn warn() -> Self {
+            Self::Warn
+        }
+
+        pub fn error() -> Self {
+            Self::Error
+        }
+
+        pub fn off() -> Self {
+            Self::Off
+        }
+
+        pub fn as_tracing_level(&self) -> Option<tracing::Level> {
+            use tracing::Level;
+
+            match self {
+                Self::Debug => Some(Level::DEBUG),
+                Self::Error => Some(Level::ERROR),
+                Self::Info => Some(Level::INFO),
+                Self::Trace => Some(Level::TRACE),
+                Self::Warn => Some(Level::WARN),
+                Self::Off => None,
+            }
+        }
+
+        pub fn as_tracing_filter(&self) -> tracing_subscriber::filter::LevelFilter {
+            use tracing_subscriber::filter::LevelFilter;
+
+            match self {
+                Self::Debug => LevelFilter::DEBUG,
+                Self::Error => LevelFilter::ERROR,
+                Self::Info => LevelFilter::INFO,
+                Self::Trace => LevelFilter::TRACE,
+                Self::Warn => LevelFilter::WARN,
+                Self::Off => LevelFilter::OFF,
+            }
+        }
+    }
 
     impl From<LogLevel> for config::Value {
         fn from(level: LogLevel) -> Self {
@@ -120,13 +158,7 @@ mod impl_level {
 
     impl From<tracing::Level> for LogLevel {
         fn from(level: tracing::Level) -> Self {
-            match level {
-                tracing::Level::DEBUG => Self::Debug,
-                tracing::Level::ERROR => Self::Error,
-                tracing::Level::TRACE => Self::Trace,
-                tracing::Level::INFO => Self::Info,
-                tracing::Level::WARN => Self::Warn,
-            }
+            Self::from_tracing(level)
         }
     }
 

@@ -2,22 +2,8 @@
     Appellation: context <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use super::Settings;
+use crate::config::Settings;
 use std::sync::{Arc, Mutex};
-
-pub trait Ctx: Send + Sync {
-    type Config;
-}
-
-pub trait AxumCtx: Ctx + Sized {
-    fn into_ext_shared(self: Arc<Self>) -> axum::Extension<Arc<Self>> {
-        axum::Extension(self)
-    }
-
-    fn into_ext(self) -> axum::Extension<Self> {
-        axum::Extension(self)
-    }
-}
 
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, serde::Deserialize, serde::Serialize,
@@ -39,11 +25,6 @@ impl Context {
         &self.settings
     }
 
-    pub fn init_tracing(&self) {
-        let level = self.settings().mode().as_tracing();
-        super::init_tracing(level)
-    }
-
     pub fn into_ext_shared(self: Arc<Self>) -> axum::Extension<Arc<Self>> {
         axum::Extension(self)
     }
@@ -61,7 +42,7 @@ impl Context {
     }
 
     pub fn with_tracing(self) -> Self {
-        self.init_tracing();
+        self.settings().logger().init_tracing();
         self
     }
 }

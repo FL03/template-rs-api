@@ -6,15 +6,7 @@ use super::{collect_configurations, LogLevel, LoggerConfig, Mode, ServerConfig};
 use config::builder::{ConfigBuilder, DefaultState};
 
 #[derive(
-    Clone,
-    Debug,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    serde::Deserialize,
-    serde::Serialize,
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, serde::Deserialize, serde::Serialize,
 )]
 pub struct Settings {
     pub logger: LoggerConfig,
@@ -89,6 +81,10 @@ impl Settings {
 
     pub fn version(&self) -> &str {
         &self.version
+    }
+
+    pub fn set_version(&mut self, version: impl ToString) {
+        self.version = version.to_string();
     }
 }
 
