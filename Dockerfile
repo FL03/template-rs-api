@@ -39,7 +39,9 @@ RUN chown -R appuser /opt/tapp
 
 USER appuser
 
-ENV DATABASE_URI \ RUST_LOG="tapp=debug,info"
+ENV DATABASE_URI = "" \
+    MODE = "production" \
+    RUST_LOG="tapp=debug,info"
 
 WORKDIR /opt/tapp
 

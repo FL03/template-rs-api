@@ -21,10 +21,7 @@ where
         .collect()
 }
 
-
-
 /// Attempts to collect configuration files, following the given pattern, into a ConfigFileVec
 pub fn collect_configurations(pattern: &str, required: bool) -> ConfigFileVec {
     gather(pattern, |p| ConfigFile::from(p).required(required))
 }
-

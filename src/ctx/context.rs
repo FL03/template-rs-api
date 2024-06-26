@@ -3,45 +3,35 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::config::Settings;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
-#[derive(
-    Clone, Debug,
-)]
+pub type DbPool = sqlx::PgPool;
+
+#[derive(Clone, Debug)]
 pub struct Context {
-    pub(crate) db: sqlx::AnyPool,
+    pub(crate) db: DbPool,
     pub(crate) settings: Settings,
 }
 
 impl Context {
-    pub async fn from_config(settings: Settings) -> Self {
-        let db = settings.database.connect().await;
+    pub fn new(db: DbPool, settings: Settings) -> Self {
         Self { db, settings }
+    }
+
+    pub fn db(&self) -> &DbPool {
+        &self.db
     }
 
     pub const fn settings(&self) -> &Settings {
         &self.settings
     }
 
-    pub fn into_ext_shared(self: Arc<Self>) -> axum::Extension<Arc<Self>> {
-        axum::Extension(self)
-    }
-
-    pub fn into_ext(self) -> axum::Extension<Self> {
+    pub fn into_ext(self: Arc<Self>) -> axum::Extension<Arc<Self>> {
         axum::Extension(self)
     }
 
     pub fn into_shared(self) -> Arc<Self> {
         Arc::new(self)
-    }
-
-    pub fn into_mut_shared(self) -> Arc<Mutex<Self>> {
-        Arc::new(Mutex::new(self))
-    }
-
-    pub fn with_tracing(self) -> Self {
-        self.settings().logger().init_tracing();
-        self
     }
 }
 

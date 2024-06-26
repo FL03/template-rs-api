@@ -17,7 +17,7 @@ pub struct App {
 impl App {
     pub fn new(cnf: Settings) -> Initializer {
         Initializer::new(cnf)
-    }    
+    }
 
     pub fn ctx(&self) -> &Context {
         &self.ctx

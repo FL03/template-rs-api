@@ -15,7 +15,8 @@ pub(crate) fn init_tracing(level: tracing::Level) {
         .compact()
         .with_ansi(true)
         .with_env_filter(EnvFilter::new(&format!(
-            "{name}={level}", name = crate::APP_NAME
+            "{name}={level}",
+            name = crate::APP_NAME
         )))
         .with_max_level(level)
         .with_target(false)

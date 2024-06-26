@@ -38,7 +38,6 @@ impl Settings {
     fn builder() -> Result<ConfigBuilder<DefaultState>, config::ConfigError> {
         // initialize the builder with default values
         let mut builder = config::Config::builder()
-
             .set_default("logger.level", LogLevel::info())?
             .set_default("mode", Mode::development())?
             .set_default("server.addr.host", LOCALHOST)?

@@ -21,10 +21,12 @@ pub struct DbConfig {
 }
 
 impl DbConfig {
-    pub async fn connect(&self) -> sqlx::AnyPool {
-        sqlx::Pool::connect(&self.url)
-            .await
-            .expect("Failed to connect to database")
+    pub async fn connect<Db>(&self) -> sqlx::Result<sqlx::Pool<Db>>
+    where
+        Db: sqlx::Database,
+    {
+        tracing::debug!("Connecting to database: {}", self.url);
+        sqlx::Pool::connect(&self.url).await
     }
 }
 
@@ -50,7 +52,14 @@ pub struct Uri {
 }
 
 impl Uri {
-    pub fn new(prefix: impl ToString, host: impl ToString, port: u16, user: impl ToString, password: impl ToString, database: impl ToString) -> Self {
+    pub fn new(
+        prefix: impl ToString,
+        host: impl ToString,
+        port: u16,
+        user: impl ToString,
+        password: impl ToString,
+        database: impl ToString,
+    ) -> Self {
         Self {
             prefix: prefix.to_string(),
             host: host.to_string(),

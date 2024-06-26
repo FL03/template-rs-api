@@ -7,7 +7,7 @@ use tempsdk::{App, Settings};
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let cnf = dbg!(Settings::build()?);
-    let app = App::new(cnf).with_tracing().init().await;
+    let app = App::new(cnf).with_tracing().init().await?;
     app.run().await?;
 
     Ok(())
