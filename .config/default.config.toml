@@ -1,6 +1,8 @@
 environment = "production"
-name = ""
 version = "v0"
+
+[logger]
+level = "info"
 
 [server]
 

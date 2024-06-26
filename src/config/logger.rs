@@ -4,12 +4,19 @@
 */
 pub use self::log_level::*;
 
+fn _fmt_rust_log(name: impl ToString, level: tracing::Level) -> String {
+    format!("RUST_LOG={name}={level}", name = name.to_string())
+}
+
 pub(crate) fn init_tracing(level: tracing::Level) {
-    use tracing_subscriber::fmt::time;
+    use tracing_subscriber::{fmt::time, EnvFilter};
 
     tracing_subscriber::fmt()
         .compact()
         .with_ansi(true)
+        .with_env_filter(EnvFilter::new(&format!(
+            "{name}={level}", name = crate::APP_NAME
+        )))
         .with_max_level(level)
         .with_target(false)
         .with_timer(time::uptime())

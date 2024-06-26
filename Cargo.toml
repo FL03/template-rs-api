@@ -48,6 +48,14 @@ version = "0.7"
 features = ["derive"]
 version = "1"
 
+[dependencies.sqlx]
+features = [
+    "any",
+    "postgres",
+    "runtime-tokio",
+]
+version = "0.7"
+
 [dependencies.strum]
 features = ["derive"]
 version = "0.26"

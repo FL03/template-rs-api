@@ -15,14 +15,9 @@ pub struct App {
 }
 
 impl App {
-    pub fn new(cnf: Settings) -> Self {
-        cnf.logger().init_tracing();
-
-        let ctx = Context::from_config(cnf).into_shared();
-        let server = Server::new(ctx.clone());
-
-        Self { ctx, server }
-    }
+    pub fn new(cnf: Settings) -> Initializer {
+        Initializer::new(cnf)
+    }    
 
     pub fn ctx(&self) -> &Context {
         &self.ctx
@@ -30,12 +25,6 @@ impl App {
 
     pub fn cnf(&self) -> &Settings {
         self.ctx.settings()
-    }
-
-    pub fn with_tracing(self) -> Self {
-        self.cnf().logger().init_tracing();
-
-        self
     }
 
     pub async fn run(self) -> std::io::Result<()> {

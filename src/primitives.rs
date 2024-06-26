@@ -11,6 +11,7 @@ pub(crate) mod prelude {
 }
 
 pub mod consts {
+    pub const APP_NAME: &str = "tapp"; // env!("CARGO_PKG_NAME");
     pub const ENV_PREFIX: &str = "APP";
 }
 

@@ -6,19 +6,17 @@ use crate::config::Settings;
 use std::sync::{Arc, Mutex};
 
 #[derive(
-    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, serde::Deserialize, serde::Serialize,
+    Clone, Debug,
 )]
 pub struct Context {
+    pub(crate) db: sqlx::AnyPool,
     pub(crate) settings: Settings,
 }
 
 impl Context {
-    pub fn from_config(settings: Settings) -> Self {
-        Self { settings }
-    }
-
-    pub fn try_to_build() -> Result<Self, config::ConfigError> {
-        Settings::build().map(Self::from_config)
+    pub async fn from_config(settings: Settings) -> Self {
+        let db = settings.database.connect().await;
+        Self { db, settings }
     }
 
     pub const fn settings(&self) -> &Settings {
@@ -74,13 +72,6 @@ impl core::borrow::BorrowMut<Settings> for Context {
     }
 }
 
-impl Default for Context {
-    fn default() -> Self {
-        let settings = Settings::default();
-        Self { settings }
-    }
-}
-
 impl core::ops::Deref for Context {
     type Target = Settings;
 
@@ -97,13 +88,7 @@ impl core::ops::DerefMut for Context {
 
 impl core::fmt::Display for Context {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-        f.write_str(&serde_json::to_string(self).unwrap())
-    }
-}
-
-impl From<Settings> for Context {
-    fn from(settings: Settings) -> Self {
-        Self { settings }
+        f.write_str(&self.settings().to_string())
     }
 }
 

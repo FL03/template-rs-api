@@ -14,6 +14,11 @@ RUN \
 
 FROM debian:bookworm-slim AS runner-builder
 
+RUN apt-get update -y && apt-get upgrade -y
+
+RUN apt-get install -y \
+    postgresql
+
 RUN adduser \
     --disabled-password \
     --gecos "" \
@@ -34,7 +39,7 @@ RUN chown -R appuser /opt/tapp
 
 USER appuser
 
-ENV RUST_LOG="tapp=debug,info"
+ENV DATABASE_URI \ RUST_LOG="tapp=debug,info"
 
 WORKDIR /opt/tapp
 
