@@ -4,14 +4,14 @@ pkgs.mkShell {
   buildInputs = with pkgs; [
     # common build inputs
     direnv
-    xclip
     duf
     eza
     fd
+    rustup
+    xclip
     # project-specific build inputs
     #bun
     #deno
-    #rustup
     #nodejs
     #nodePackages.pnpm
   ];
