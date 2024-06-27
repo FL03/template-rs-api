@@ -28,14 +28,6 @@ where
         ServerBuilder::from_router(router)
     }
 
-    pub fn serve_dir(self, path: &str, workdir: &str) -> Self {
-        self.route_service(path, services::ServeDir::new(workdir))
-    }
-
-    pub fn serve_file(self, target: &str) -> Self {
-        self.route_service("/", services::ServeFile::new(target))
-    }
-
     pub fn with_context(self, ctx: Arc<Context>) -> Self {
         self.layer(Extension(ctx))
     }
@@ -105,6 +97,14 @@ where
     {
         let router = self.router.route_service(path, svc);
         Self { router }
+    }
+
+    pub fn serve_dir(self, path: &str, workdir: &str) -> Self {
+        self.route_service(path, services::ServeDir::new(workdir))
+    }
+
+    pub fn serve_file(self, target: &str) -> Self {
+        self.route_service("/", services::ServeFile::new(target))
     }
 
     pub fn with_state<S2>(self, state: S) -> ServerBuilder<S2> {

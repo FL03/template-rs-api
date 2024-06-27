@@ -8,8 +8,17 @@ pub(crate) mod context;
 
 use std::sync::Arc;
 
-pub trait Ctx: Clone + Send + Sync + 'static {
+pub trait Ctx<S = ()>
+where
+    S: Clone + Send + Sync + 'static,
+{
     type Config;
+
+    fn cnf(&self) -> &Self::Config;
+
+    fn into_shared(self) -> Arc<Self>;
+
+    fn state(&self) -> S;
 }
 
 pub trait AxumCtx: Ctx + Sized {

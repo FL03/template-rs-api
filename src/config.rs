@@ -17,7 +17,7 @@ use config::builder::{ConfigBuilder, DefaultState};
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, serde::Deserialize, serde::Serialize,
 )]
 pub struct Settings {
-    pub database: DbConfig,
+    pub database: DatabaseCnf,
     pub logger: LoggerConfig,
     pub mode: Mode,
     pub server: ServerConfig,
@@ -27,7 +27,7 @@ pub struct Settings {
 impl Settings {
     pub fn debug() -> Self {
         Self {
-            database: DbConfig::default(),
+            database: DatabaseCnf::default(),
             logger: LoggerConfig::default(),
             mode: Mode::Development,
             server: ServerConfig::default(),

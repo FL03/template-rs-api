@@ -6,7 +6,6 @@ use crate::AppState;
 use axum::extract::{Json, Path, State};
 use serde_json::Value;
 
-
 pub async fn home(State(ctx): State<AppState>) -> Json<Value> {
     let samples = ctx.fetch_samples().await.unwrap_or_default();
     let data = serde_json::json!({

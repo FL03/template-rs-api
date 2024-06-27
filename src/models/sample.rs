@@ -4,7 +4,19 @@
 */
 use super::ItemId;
 
-#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd, serde::Deserialize, serde::Serialize, sqlx::FromRow)]
+#[derive(
+    Clone,
+    Debug,
+    Default,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    serde::Deserialize,
+    serde::Serialize,
+    sqlx::FromRow,
+)]
 #[serde(rename_all = "snake_case")]
 pub struct SampleModel {
     pub id: ItemId,

@@ -4,29 +4,29 @@
 */
 
 #[derive(
-    Clone,
-    Debug,
-    Default,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    serde::Deserialize,
-    serde::Serialize,
+    Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, serde::Deserialize, serde::Serialize,
 )]
-pub struct DbConfig {
-    pub url: String,
+pub struct DatabaseCnf {
     pub pool_size: Option<u32>,
+    pub url: String,
 }
 
-impl DbConfig {
+impl DatabaseCnf {
     pub async fn connect<Db>(&self) -> sqlx::Result<sqlx::Pool<Db>>
     where
         Db: sqlx::Database,
     {
         tracing::debug!("Connecting to database: {}", self.url);
         sqlx::Pool::connect(&self.url).await
+    }
+}
+
+impl Default for DatabaseCnf {
+    fn default() -> Self {
+        Self {
+            pool_size: None,
+            url: "postgresql://localhost:5432/postgres".to_string(),
+        }
     }
 }
 

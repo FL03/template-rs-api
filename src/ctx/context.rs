@@ -2,8 +2,8 @@
     Appellation: context <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::Settings;
 use crate::models::SampleModel;
+use crate::Settings;
 use sqlx::FromRow;
 use std::sync::Arc;
 
@@ -37,12 +37,23 @@ impl Context {
     }
 
     pub async fn fetch_samples(&self) -> sqlx::Result<Vec<SampleModel>> {
-        let query = sqlx::query("SELECT * FROM samples").fetch_all(&self.db).await?;
-        let samples = query.iter().filter_map(| item | SampleModel::from_row(item).map_err(|err| tracing::error!("{err}")).ok()).collect();
+        let query = sqlx::query("SELECT * FROM samples")
+            .fetch_all(&self.db)
+            .await?;
+        let samples = query
+            .iter()
+            .filter_map(|item| {
+                SampleModel::from_row(item)
+                    .map_err(|err| tracing::error!("{err}"))
+                    .ok()
+            })
+            .collect();
         Ok(samples)
     }
     pub async fn _fetch_samples(&self) -> sqlx::Result<Vec<sqlx::postgres::PgRow>> {
-        let query = sqlx::query("SELECT * FROM samples").fetch_all(&self.db).await?;
+        let query = sqlx::query("SELECT * FROM samples")
+            .fetch_all(&self.db)
+            .await?;
         Ok(query)
     }
 }

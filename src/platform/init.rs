@@ -2,7 +2,7 @@
     Appellation: init <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::{App, Context, Server, Settings};
+use crate::{Context, Platform, Server, Settings};
 
 pub struct Initializer {
     cnf: Settings,
@@ -19,7 +19,7 @@ impl Initializer {
         self
     }
 
-    pub async fn init(self) -> anyhow::Result<App> {
+    pub async fn init(self) -> anyhow::Result<Platform> {
         let db = self.cnf.database.connect().await?;
         let ctx = Context {
             db,
@@ -28,7 +28,7 @@ impl Initializer {
         .into_shared();
         let server = Server::new(ctx.clone());
 
-        let app = App { ctx, server };
+        let app = Platform { ctx, server };
         Ok(app)
     }
 }

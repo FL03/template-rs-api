@@ -1,12 +1,9 @@
 /*
-    Appellation: app <module>
+    Appellation: server <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-pub use self::builder::ServerBuilder;
-
-pub(crate) mod builder;
-
-use crate::{ApiRouterTy, Context};
+use super::{utils, ServerBuilder};
+use crate::{ApiRouter, Context};
 
 use axum::Router;
 use std::sync::Arc;
@@ -43,7 +40,7 @@ impl Server {
         &self.ctx
     }
 
-    pub fn router(&self) -> ApiRouterTy {
+    pub fn router(&self) -> ApiRouter {
         self.router.clone()
     }
 
@@ -65,19 +62,5 @@ impl Server {
 
     pub fn with_router(self, router: Router) -> Self {
         Self { router, ..self }
-    }
-}
-
-pub(crate) mod utils {
-    use std::sync::Arc;
-    #[tracing::instrument(skip_all, name = "shutdown", target = "app")]
-    pub async fn shutdown(ctx: Arc<crate::Context>) {
-        
-        tokio::signal::ctrl_c()
-            .await
-            .expect("CTRL+C: shutdown failed");
-        tracing::warn!("Closing the database connection...");
-        ctx.db().close().await;
-        tracing::warn!("Shutdown the server...");
     }
 }

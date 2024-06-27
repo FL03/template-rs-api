@@ -1,20 +1,17 @@
 /*
-    Appellation: app <module>
+    Appellation: platform <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-pub use self::init::*;
-
-pub(crate) mod init;
-
+use super::Initializer;
 use crate::{Context, Server, Settings};
 use std::sync::Arc;
 
-pub struct App {
+pub struct Platform {
     pub(crate) ctx: Arc<Context>,
-    server: Server,
+    pub(crate) server: Server,
 }
 
-impl App {
+impl Platform {
     pub fn new(cnf: Settings) -> Initializer {
         Initializer::new(cnf)
     }
@@ -27,6 +24,7 @@ impl App {
         self.ctx.settings()
     }
 
+    #[tracing::instrument(skip_all, name = "run", target = "app")]
     pub async fn run(self) -> std::io::Result<()> {
         self.server.serve().await
     }
@@ -36,13 +34,13 @@ impl App {
  ************* Implementations *************
 */
 
-impl AsRef<Context> for App {
+impl AsRef<Context> for Platform {
     fn as_ref(&self) -> &Context {
         &self.ctx
     }
 }
 
-impl AsRef<Settings> for App {
+impl AsRef<Settings> for Platform {
     fn as_ref(&self) -> &Settings {
         self.ctx.settings()
     }

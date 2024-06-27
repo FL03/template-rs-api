@@ -21,6 +21,6 @@ pub mod types {
     pub type Arcm<T = ()> = Arc<Mutex<T>>;
 
     pub type AppState = Arc<crate::ctx::Context>;
-
-    pub type ApiRouterTy = axum::Router;
+    /// A type alias for `axum`'s [Router](axum::Router)
+    pub type ApiRouter<S = ()> = axum::Router<S>;
 }
