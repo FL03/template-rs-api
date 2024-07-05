@@ -9,6 +9,13 @@ use std::sync::Arc;
 
 pub type DbPool = sqlx::PgPool;
 
+#[async_trait::async_trait]
+pub trait ItemOps {
+    async fn add_item(&self, title: String, description: String) -> sqlx::Result<ItemModel>;
+    async fn get_items(&self) -> sqlx::Result<Vec<ItemModel>>;
+    async fn get_item(&self, id: ItemId) -> sqlx::Result<ItemModel>;
+}
+
 #[derive(Clone, Debug)]
 pub struct Context {
     pub(crate) db: DbPool,
@@ -37,17 +44,18 @@ impl Context {
     }
 }
 
-impl Context {
-    pub async fn add_item(&self, title: String, description: String) -> sqlx::Result<ItemModel> {
-        let query = sqlx::query("INSERT INTO items (title, description) VALUES ($1, $2) RETURNING *")
-            .bind(title)
-            .bind(description)
-            .fetch_one(&self.db)
-            .await?;
-        ItemModel::from_row(&query)
-            .map_err(super::utils::map_err)
+#[async_trait::async_trait]
+impl ItemOps for Context {
+    async fn add_item(&self, title: String, description: String) -> sqlx::Result<ItemModel> {
+        let query =
+            sqlx::query("INSERT INTO items (title, description) VALUES ($1, $2) RETURNING *")
+                .bind(title)
+                .bind(description)
+                .fetch_one(&self.db)
+                .await?;
+        ItemModel::from_row(&query).map_err(super::utils::map_err)
     }
-    pub async fn get_items(&self) -> sqlx::Result<Vec<ItemModel>> {
+    async fn get_items(&self) -> sqlx::Result<Vec<ItemModel>> {
         let query = sqlx::query("SELECT * FROM items")
             .fetch_all(&self.db)
             .await?;
@@ -62,14 +70,11 @@ impl Context {
         Ok(samples)
     }
 
-    pub async fn get_item(&self, id: ItemId) -> sqlx::Result<ItemModel> {
+    async fn get_item(&self, id: ItemId) -> sqlx::Result<ItemModel> {
         let query = sqlx::query("SELECT * FROM items WHERE id = $1");
-            
-        let item = query.bind(id)
-            .fetch_one(&self.db)
-            .await?;
-        ItemModel::from_row(&item)
-                .map_err(super::utils::map_err)
+
+        let item = query.bind(id).fetch_one(&self.db).await?;
+        ItemModel::from_row(&item).map_err(super::utils::map_err)
     }
 }
 

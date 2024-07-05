@@ -9,7 +9,7 @@ pub mod items;
 pub type LocalTz = chrono::Local;
 pub type Timestamp<Tz = chrono::Utc> = chrono::DateTime<Tz>;
 
-pub type ItemId =  uuid::Uuid;
+pub type ItemId = uuid::Uuid;
 
 pub type BigInt = i64;
 

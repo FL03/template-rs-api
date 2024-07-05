@@ -30,7 +30,12 @@ impl ItemModel {
     pub fn new(title: impl ToString, description: impl ToString) -> Self {
         let id = uuid::Uuid::new_v4();
         let created_at = chrono::Utc::now();
-        Self { id, title: title.to_string(), description: description.to_string(), created_at }
+        Self {
+            id,
+            title: title.to_string(),
+            description: description.to_string(),
+            created_at,
+        }
     }
 
     pub fn id(&self) -> ItemId {

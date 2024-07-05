@@ -2,8 +2,9 @@
     Appellation: base <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::AppState;
+use crate::ctx::ItemOps;
 use crate::models::{ItemId, ItemModel};
+use crate::AppState;
 use axum::extract::{Json, Path, State};
 use serde_json::Value;
 
@@ -14,7 +15,7 @@ pub async fn get_items(State(ctx): State<AppState>) -> Json<Vec<ItemModel>> {
 
 pub async fn get_item(State(ctx): State<AppState>, id: Path<ItemId>) -> Json<Option<ItemModel>> {
     let item = ctx.get_item(id.0).await.ok();
-    
+
     axum::Json(item)
 }
 
@@ -36,5 +37,3 @@ pub async fn post_item(State(ctx): State<AppState>, title: Path<String>) -> Json
     };
     axum::Json(data)
 }
-
-

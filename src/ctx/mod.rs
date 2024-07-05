@@ -2,7 +2,7 @@
     Appellation: ctx <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-pub use self::context::Context;
+pub use self::context::*;
 
 pub(crate) mod context;
 
@@ -32,7 +32,7 @@ pub trait AxumCtx: Ctx + Sized {
 }
 
 pub(crate) mod utils {
-    
+
     pub fn map_err<T>(err: T) -> T
     where
         T: std::fmt::Display,
