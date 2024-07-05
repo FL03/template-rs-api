@@ -30,3 +30,14 @@ pub trait AxumCtx: Ctx + Sized {
         axum::Extension(self)
     }
 }
+
+pub(crate) mod utils {
+    
+    pub fn map_err<T>(err: T) -> T
+    where
+        T: std::fmt::Display,
+    {
+        tracing::error!("{err}");
+        err
+    }
+}

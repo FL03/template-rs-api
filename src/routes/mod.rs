@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 
-pub mod base;
+pub mod items;
 
 use crate::AppState;
 use axum::{
@@ -16,12 +16,13 @@ where
     S: Clone + Send + Sync + 'static,
 {
     Router::new()
-        .route("/", get(base::home))
-        .route("/sample/:id", get(base::get_sample))
-        .route("/sample/:id", post(base::post_sample))
+        .nest("/items", items_router())
         .with_state(state)
 }
 
-// pub(crate) fn _api(ctx: AppState) -> ApiRouterTy {
-//     Router::new().nest("/", v0()).layer(Extension(ctx))
-// }
+fn items_router() -> Router<AppState> {
+    Router::new()
+        .route("/", get(items::get_items))
+        .route("/:id", get(items::get_item))
+        .route("/:id", post(items::post_item))
+}

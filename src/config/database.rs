@@ -3,6 +3,8 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 
+const DEFAULT_DATABASE_URL: &str = "postgresql://localhost:5432/postgres";
+
 #[derive(
     Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd, serde::Deserialize, serde::Serialize,
 )]
@@ -25,7 +27,7 @@ impl Default for DatabaseCnf {
     fn default() -> Self {
         Self {
             pool_size: None,
-            url: "postgresql://localhost:5432/postgres".to_string(),
+            url: DEFAULT_DATABASE_URL.to_string(),
         }
     }
 }

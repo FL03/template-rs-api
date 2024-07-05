@@ -2,7 +2,7 @@
     Appellation: context <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::models::SampleModel;
+use crate::models::{ItemId, ItemModel};
 use crate::Settings;
 use sqlx::FromRow;
 use std::sync::Arc;
@@ -35,26 +35,41 @@ impl Context {
     pub fn into_shared(self) -> Arc<Self> {
         Arc::new(self)
     }
+}
 
-    pub async fn fetch_samples(&self) -> sqlx::Result<Vec<SampleModel>> {
-        let query = sqlx::query("SELECT * FROM samples")
+impl Context {
+    pub async fn add_item(&self, title: String, description: String) -> sqlx::Result<ItemModel> {
+        let query = sqlx::query("INSERT INTO items (title, description) VALUES ($1, $2) RETURNING *")
+            .bind(title)
+            .bind(description)
+            .fetch_one(&self.db)
+            .await?;
+        ItemModel::from_row(&query)
+            .map_err(super::utils::map_err)
+    }
+    pub async fn get_items(&self) -> sqlx::Result<Vec<ItemModel>> {
+        let query = sqlx::query("SELECT * FROM items")
             .fetch_all(&self.db)
             .await?;
         let samples = query
             .iter()
             .filter_map(|item| {
-                SampleModel::from_row(item)
-                    .map_err(|err| tracing::error!("{err}"))
+                ItemModel::from_row(item)
+                    .map_err(super::utils::map_err)
                     .ok()
             })
             .collect();
         Ok(samples)
     }
-    pub async fn _fetch_samples(&self) -> sqlx::Result<Vec<sqlx::postgres::PgRow>> {
-        let query = sqlx::query("SELECT * FROM samples")
-            .fetch_all(&self.db)
+
+    pub async fn get_item(&self, id: ItemId) -> sqlx::Result<ItemModel> {
+        let query = sqlx::query("SELECT * FROM items WHERE id = $1");
+            
+        let item = query.bind(id)
+            .fetch_one(&self.db)
             .await?;
-        Ok(query)
+        ItemModel::from_row(&item)
+                .map_err(super::utils::map_err)
     }
 }
 

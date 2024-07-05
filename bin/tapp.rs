@@ -1,12 +1,12 @@
 /*
-    Appellation: taxum <binary>
+    Appellation: tapp <binary>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use tempsdk::{Platform, Settings};
+use template_rs_api::{Platform, Settings};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let cnf = dbg!(Settings::build()?);
+    let cnf = Settings::build()?;
     let app = Platform::new(cnf).with_tracing().init().await?;
     app.run().await?;
 
