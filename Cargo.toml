@@ -17,7 +17,7 @@ version = "0.1.0"
 bench = false
 doctest = false
 name = "tapp"
-path = "bin/tapp.rs"
+path = "src/bin/tapp.rs"
 
 [lib]
 bench = false
