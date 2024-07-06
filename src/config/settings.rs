@@ -3,13 +3,12 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 #[doc(inline)]
-pub use self::{database::*, logger::*, mode::*, server::*, utils::*};
+pub use self::{database::*, logger::*, mode::*, server::*};
 
 pub(crate) mod database;
 pub(crate) mod logger;
 pub(crate) mod mode;
 pub(crate) mod server;
-pub(crate) mod utils;
 
 use config::builder::{ConfigBuilder, DefaultState};
 
@@ -35,7 +34,7 @@ impl Settings {
         }
     }
 
-    fn builder() -> Result<ConfigBuilder<DefaultState>, config::ConfigError> {
+    fn builder_base() -> Result<ConfigBuilder<DefaultState>, config::ConfigError> {
         // initialize the builder with default values
         let mut builder = config::Config::builder()
             .set_default("logger.level", LogLevel::info())?
@@ -45,6 +44,7 @@ impl Settings {
         // add sources
         builder = builder
             .add_source(config::Environment::with_prefix("APP").separator("_"))
+            .add_source(config::Environment::with_prefix("DATABASE").separator("_"))
             .add_source(config::File::with_name(".config/default.config.toml").required(false))
             .add_source(config::File::with_name(".config/prod.config.toml").required(false));
         // setup overrides
@@ -58,19 +58,19 @@ impl Settings {
     }
 
     pub fn build() -> Result<Self, config::ConfigError> {
-        Self::builder()?.build()?.try_deserialize()
+        Self::builder_base()?.build()?.try_deserialize()
     }
 
     pub fn build_from_file(file: &str) -> Result<Self, config::ConfigError> {
-        Self::builder()?
+        Self::builder_base()?
             .add_source(config::File::with_name(file))
             .build()?
             .try_deserialize()
     }
 
     pub fn build_from_pattern(pattern: &str) -> Result<Self, config::ConfigError> {
-        Self::builder()?
-            .add_source(collect_configurations(pattern, false))
+        Self::builder_base()?
+            .add_source(crate::config::collect_configurations(pattern, false))
             .build()?
             .try_deserialize()
     }

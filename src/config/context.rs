@@ -3,7 +3,7 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::models::{ItemId, ItemModel};
-use crate::Settings;
+use crate::{map_err, Settings};
 use sqlx::FromRow;
 use std::sync::Arc;
 
@@ -14,6 +14,13 @@ pub trait ItemOps {
     async fn add_item(&self, title: String, description: String) -> sqlx::Result<ItemModel>;
     async fn get_items(&self) -> sqlx::Result<Vec<ItemModel>>;
     async fn get_item(&self, id: ItemId) -> sqlx::Result<ItemModel>;
+    async fn remove_item(&self, id: ItemId) -> sqlx::Result<ItemModel>;
+    async fn update_item(
+        &self,
+        id: ItemId,
+        title: String,
+        description: String,
+    ) -> sqlx::Result<ItemModel>;
 }
 
 #[derive(Clone, Debug)]
@@ -53,7 +60,7 @@ impl ItemOps for Context {
                 .bind(description)
                 .fetch_one(&self.db)
                 .await?;
-        ItemModel::from_row(&query).map_err(super::utils::map_err)
+        ItemModel::from_row(&query).map_err(map_err)
     }
     async fn get_items(&self) -> sqlx::Result<Vec<ItemModel>> {
         let query = sqlx::query("SELECT * FROM items")
@@ -61,11 +68,7 @@ impl ItemOps for Context {
             .await?;
         let samples = query
             .iter()
-            .filter_map(|item| {
-                ItemModel::from_row(item)
-                    .map_err(super::utils::map_err)
-                    .ok()
-            })
+            .filter_map(|item| ItemModel::from_row(item).map_err(map_err).ok())
             .collect();
         Ok(samples)
     }
@@ -74,7 +77,31 @@ impl ItemOps for Context {
         let query = sqlx::query("SELECT * FROM items WHERE id = $1");
 
         let item = query.bind(id).fetch_one(&self.db).await?;
-        ItemModel::from_row(&item).map_err(super::utils::map_err)
+        ItemModel::from_row(&item).map_err(map_err)
+    }
+
+    async fn remove_item(&self, id: ItemId) -> sqlx::Result<ItemModel> {
+        let query = sqlx::query("DELETE FROM items WHERE id = $1 RETURNING *")
+            .bind(id)
+            .fetch_one(&self.db)
+            .await?;
+        ItemModel::from_row(&query).map_err(map_err)
+    }
+
+    async fn update_item(
+        &self,
+        id: ItemId,
+        title: String,
+        description: String,
+    ) -> sqlx::Result<ItemModel> {
+        let query =
+            sqlx::query("UPDATE items SET title = $1, description = $2 WHERE id = $3 RETURNING *")
+                .bind(title)
+                .bind(description)
+                .bind(id)
+                .fetch_one(&self.db)
+                .await?;
+        ItemModel::from_row(&query).map_err(map_err)
     }
 }
 

@@ -7,7 +7,7 @@ pub mod items;
 
 use crate::AppState;
 use axum::{
-    routing::{get, post},
+    routing::{delete, get, post, put},
     Router,
 };
 
@@ -24,5 +24,7 @@ fn items_router() -> Router<AppState> {
     Router::new()
         .route("/", get(items::get_items))
         .route("/:id", get(items::get_item))
-        .route("/:id", post(items::post_item))
+        .route("/:id", post(items::add_item))
+        .route("/:id", delete(items::remove_item))
+        .route("/:id", put(items::update_item))
 }

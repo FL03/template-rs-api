@@ -11,7 +11,7 @@ use tokio::net::TcpListener;
 
 pub struct Server {
     ctx: Arc<Context>,
-    router: Router,
+    router: ApiRouter,
 }
 
 impl Server {
@@ -22,6 +22,10 @@ impl Server {
             .with_tracing()
             .build();
         Self { ctx, router }
+    }
+
+    pub fn builder() -> ServerBuilder {
+        ServerBuilder::new()
     }
 
     pub fn from_context(ctx: Context) -> Self {

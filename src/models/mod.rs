@@ -6,8 +6,9 @@ pub use self::items::ItemModel;
 
 pub mod items;
 
-pub type LocalTz = chrono::Local;
-pub type Timestamp<Tz = chrono::Utc> = chrono::DateTime<Tz>;
+pub type Timezone = chrono::Local;
+
+pub type DateT<Tz = Timezone> = chrono::DateTime<Tz>;
 
 pub type ItemId = uuid::Uuid;
 
