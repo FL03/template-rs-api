@@ -1,5 +1,9 @@
 tasks:
-  - init: cargo xtask action --setup && cargo xtask action --auto
-    command: cargo watch -x build
+  - init: |
+      rustup target add wasm32-unknown-unknown wasm32-wasi
+      rustup update
+      cargo install sqlx-cli
+      cargo build -r
+    command: cargo watch -x run
 
 

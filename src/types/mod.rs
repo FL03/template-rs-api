@@ -15,8 +15,10 @@ pub type AppState = Arc<crate::Context>;
 /// A type alias for `axum`'s [Router](axum::Router)
 pub type ApiRouter<S = ()> = axum::Router<S>;
 
+pub type DbPool<P = sqlx::Postgres> = sqlx::Pool<P>;
+
 pub(crate) mod prelude {
     pub use super::crud::CRUD;
     pub use super::status::Status;
-    pub use super::{ApiRouter, AppState, Arcm};
+    pub use super::{ApiRouter, AppState, Arcm, DbPool};
 }

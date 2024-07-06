@@ -3,11 +3,9 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 use crate::models::{ItemId, ItemModel};
-use crate::{map_err, Settings};
+use crate::{map_err, DbPool, Settings};
 use sqlx::FromRow;
 use std::sync::Arc;
-
-pub type DbPool = sqlx::PgPool;
 
 #[async_trait::async_trait]
 pub trait ItemOps {

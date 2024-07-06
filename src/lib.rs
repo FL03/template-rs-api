@@ -17,7 +17,6 @@ pub mod api;
 pub mod config;
 pub mod models;
 pub mod platform;
-pub mod routes;
 pub mod types;
 
 pub mod prelude {

@@ -2,7 +2,7 @@
     Appellation: builder <module>
     Contrib: FL03 <jo3mccain@icloud.com>
 */
-use crate::routes;
+use crate::api::routes;
 use crate::{AppState, Context};
 use axum::{
     extract::Request,
