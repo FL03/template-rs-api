@@ -38,6 +38,10 @@ impl ItemModel {
         }
     }
 
+    pub fn description(&self) -> &str {
+        &self.description
+    }
+
     pub fn id(&self) -> ItemId {
         self.id
     }
@@ -45,6 +49,16 @@ impl ItemModel {
     pub fn title(&self) -> &str {
         &self.title
     }
+
+    pub fn created_at(&self) -> DateT {
+        self.created_at
+    }
+}
+
+pub trait Builder<T> {
+    type Output;
+
+    fn build(self) -> Self::Output;
 }
 
 pub struct ItemBuilder {
