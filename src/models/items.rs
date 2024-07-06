@@ -27,15 +27,8 @@ pub struct ItemModel {
 }
 
 impl ItemModel {
-    pub fn new(title: impl ToString, description: impl ToString) -> Self {
-        let id = uuid::Uuid::new_v4();
-        let created_at = Timezone::now();
-        Self {
-            id,
-            title: title.to_string(),
-            description: description.to_string(),
-            created_at,
-        }
+    pub fn new() -> ItemBuilder {
+        ItemBuilder::new()
     }
 
     pub fn description(&self) -> &str {
@@ -65,7 +58,6 @@ pub struct ItemBuilder {
     id: Option<ItemId>,
     description: Option<String>,
     title: Option<String>,
-    created_at: DateT,
 }
 
 impl ItemBuilder {
@@ -74,7 +66,6 @@ impl ItemBuilder {
             id: None,
             description: None,
             title: None,
-            created_at: chrono::Local::now(),
         }
     }
 
@@ -104,7 +95,7 @@ impl ItemBuilder {
             id: self.id.unwrap_or_else(uuid::Uuid::new_v4),
             description: self.description.unwrap_or_default(),
             title: self.title.unwrap_or_default(),
-            created_at: self.created_at,
+            created_at: Timezone::now(),
         }
     }
 }
