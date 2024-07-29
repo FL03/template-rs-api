@@ -63,7 +63,7 @@ features = [
     "time",
     "uuid"
 ]
-version = "0.7"
+version = "0.8"
 
 [dependencies.strum]
 features = ["derive"]
